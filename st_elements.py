@@ -91,7 +91,8 @@ def sidebar_graph_select():
                                                         'Tagesverlauf',
                                                         'gleitender Mittelwert',
                                                         'Saison-Trend-Zerlegung',
-                                                        'Oberflächendiagramm'
+                                                        'Oberflächendiagramm',
+                                                        'Radverkehr und Wetter'
                                                         ])
     return selected_graph
 

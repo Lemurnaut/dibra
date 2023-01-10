@@ -2,6 +2,7 @@ import streamlit as st
 import streamlit.components.v1 as components
 import pandas
 import plot
+import preprocess
 import st_elements
 
 class get_values(object):
@@ -109,7 +110,9 @@ class SelectGraph():
 
     def stl(dataframe_list):
         st.header('Saison-Trend-Zerlegung')
+
         resample_option, robust_option = st_elements.stl_options()
+
         for dataframe in dataframe_list:
             trend, seasonal, resid = plot.stl(dataframe, resample_option, robust_option)
 
@@ -164,6 +167,32 @@ class SelectGraph():
                 st.plotly_chart(fig, theme="streamlit", use_container_width=True)
             except ValueError:
                 st.warning('Fehler! Fenster muss größer als die Mindesanzahl der Beobachtungen sein.', icon="⚠️")
+
+    def wetter(dataframe_list):
+        st.header('Radverkehr und Wetter')
+        for dataframe in dataframe_list:
+            x = get_values(dataframe)
+
+            st.subheader(dataframe.columns[0])
+            st.write(
+                f'{x.index_date_min} bis {x.index_date_max} zwischen {x.index_time_min} Uhr und {x.index_time_max} Uhr')
+
+            wetter_start = str(dataframe.index.min())
+            wetter_end = str(dataframe.index.max())
+
+            wetter = preprocess.get_weather(wetter_start, wetter_end, 691)
+
+            bikewetter = pandas.merge(dataframe, wetter, left_index=True, right_index=True, how='outer')
+
+            st.write('Radverkehr und Temperatur')
+            fig = plot.radverkehr_temperatur(bikewetter, 'D')
+            st.plotly_chart(fig, theme="streamlit", use_container_width=True)
+
+            st.write('Radverkehr und Niederschlag')
+            fig = plot.radverkehr_niederschlag(bikewetter, 'D')
+            st.plotly_chart(fig, theme="streamlit", use_container_width=True)
+
+
 
 
 

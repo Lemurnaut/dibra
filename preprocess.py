@@ -2,6 +2,8 @@ from functools import reduce
 import pandas
 from scipy.stats import zscore
 import datetime as dt
+from wetterdienst.provider.dwd.observation import DwdObservationRequest, DwdObservationDataset, DwdObservationPeriod, DwdObservationResolution
+from wetterdienst import Settings
 
 
 def download_data():
@@ -117,3 +119,42 @@ def combine_stations_sides(dataframe_list):
                              dataframe_list[10],
                              dataframe_list[11]]
     return dataframe_list_simple
+
+
+def get_weather(start_date: str, end_date: str, station_id: int):
+    '''
+    for wetterdienst==0.42.0
+    '''
+
+    Settings.tidy = True
+    Settings.humanize = True
+    Settings.si_units = False
+
+    import pandas
+
+    request = DwdObservationRequest(
+        parameter=[DwdObservationDataset.TEMPERATURE_AIR, DwdObservationDataset.PRECIPITATION],
+        resolution=DwdObservationResolution.HOURLY,
+        start_date=start_date,
+        end_date=end_date,
+    ).filter_by_station_id(station_id=(station_id))
+
+    for result in request.values.query():
+        niederschlag = result.df[result.df['parameter'] == 'precipitation_height']
+        temperatur = result.df[result.df['parameter'] == 'temperature_air_mean_200']
+
+    pandas.to_datetime(niederschlag['date'], format='%Y-%m-%d %H:%M:%S').copy()
+    niederschlag.set_index(pandas.DatetimeIndex(niederschlag['date']), inplace=True)
+
+    niederschlag = niederschlag.rename(columns={'value': 'Niederschlag'})
+    niederschlag = niederschlag.drop(columns={'station_id', 'dataset', 'parameter', 'date', 'quality'})
+
+    pandas.to_datetime(temperatur['date'], format='%Y-%m-%d %H:%M:%S').copy()
+    temperatur.set_index(pandas.DatetimeIndex(temperatur['date']), inplace=True)
+
+    temperatur = temperatur.rename(columns={'value': 'Temperatur'})
+    temperatur = temperatur.drop(columns={'station_id', 'dataset', 'parameter', 'date', 'quality'})
+
+    wetter = pandas.merge(niederschlag, temperatur, left_index=True, right_index=True, how='outer')
+
+    return wetter

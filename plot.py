@@ -5,6 +5,99 @@ import plotly.graph_objects as go
 from statsmodels.tsa.seasonal import STL
 import datetime as dt
 
+class surface():
+    def year_month(dataframe, calc_option):
+
+        dataframe = dataframe.groupby([dataframe.index.year, dataframe.index.month]).agg(calc_option)
+        dataframe = dataframe.unstack()
+
+        fig = go.Figure(data=[
+            go.Surface(z=dataframe.values, hovertemplate='Jahr: %{y}<br>Monat: %{x}<br>Anzahl: %{z}<extra></extra>')])
+        fig.update_layout(scene=dict(
+            yaxis=dict(
+                title='Jahr',
+                ticktext=dataframe.index.unique().astype(str).tolist(),
+                tickvals=list(range(len(dataframe.index.unique()))),
+                tickmode='array'
+            ),
+            xaxis=dict(
+                title='Monat',
+                ticktext=['JAN', 'FEB', 'MÄR', 'APR', 'MAI', 'JUN', 'JUL', 'AUG', 'SEP', 'OKT', 'NOV', 'DEZ'],
+                tickvals=list(range(len(dataframe.columns))),
+                tickmode='array'
+            ),
+            zaxis=dict(
+                title='Anzahl'
+            ),
+        ),
+            width=1600,
+            height=850,
+            margin=dict(r=10, l=10, b=10, t=10
+                        ))
+        return fig
+
+    def month_week(dataframe, calc_option):
+        import plotly.graph_objects as go
+
+        dataframe = dataframe.groupby([dataframe.index.isocalendar().week, dataframe.index.month]).sum()
+        dataframe = dataframe.unstack()
+
+        fig = go.Figure(data=[go.Surface(z=dataframe.values,
+                                         hovertemplate='Monat: %{x}<br>Stunde: %{y} Uhr<br>Anzahl: %{z}<extra></extra>')])
+        fig.update_layout(scene=dict(
+            xaxis=dict(
+                title='Monat',
+                ticktext=['JAN', 'FEB', 'MÄR', 'APR', 'MAI', 'JUN', 'JUL', 'AUG', 'SEP', 'OKT', 'NOV', 'DEZ'],
+                tickvals=list(range(len(dataframe.columns))),
+                tickmode='array'
+            ),
+
+            yaxis=dict(
+                title='Stunde',
+                ticktext=dataframe.index.unique().astype(str).tolist(),
+                tickvals=list(range(len(dataframe.index.unique()))),
+                tickmode='array'
+            ),
+            zaxis=dict(
+                title='Anzahl'
+            ),
+        ),
+            width=1600,
+            height=850,
+            margin=dict(r=10, l=10, b=10, t=10
+                        ))
+        return fig
+
+    def week_hour(dataframe, calc_option):
+        import plotly.graph_objects as go
+
+        dataframe = dataframe.groupby([dataframe.index.hour, dataframe.index.isocalendar().week]).sum()
+        dataframe = dataframe.unstack()
+
+        fig = go.Figure(data=[go.Surface(z=dataframe.values,
+                                         hovertemplate='Woche: %{x}<br>Stunde: %{y} Uhr<br>Anzahl: %{z}<extra></extra>')])
+        fig.update_layout(scene=dict(
+            xaxis=dict(
+                title='Woche',
+                tickvals=list(range(len(dataframe.columns))),
+                tickmode='array'
+            ),
+
+            yaxis=dict(
+                title='Stunde',
+                ticktext=dataframe.index.unique().astype(str).tolist(),
+                tickvals=list(range(len(dataframe.index.unique()))),
+                tickmode='array'
+            ),
+            zaxis=dict(
+                title='Anzahl'
+            ),
+        ),
+            width=1600,
+            height=850,
+            margin=dict(r=10, l=10, b=10, t=10
+                        ))
+        return fig
 
 def moving_av(dataframe, window, periods):
     ma = dataframe.resample('D').sum().rolling(window=window, center=True, min_periods=periods).mean()
@@ -23,7 +116,6 @@ def moving_av(dataframe, window, periods):
     fig.update_layout(showlegend=False)
     fig.update_layout(xaxis_title='Zeit', yaxis_title='Radverkehrsaufkommen')
     return fig
-
 
 def week_dist(dataframe):
     dataframe_name = dataframe.columns[0]
@@ -48,9 +140,7 @@ def week_dist(dataframe):
     fig.update_layout(showlegend=False)
     fig.update_layout(xaxis_title='Zeit', yaxis_title='Durchschnittliches Radverkehrsaufkommen')
 
-    #fig.update_layout(template='none')
     return fig
-
 
 def weekdays(dataframe):
     dataframe_startdate = dataframe.index.min()
@@ -139,7 +229,6 @@ def linechart_cumsum(dataframe):
     '''
     fig = px.line(dataframe.cumsum(), hover_data={'variable': False})
 
-    fig.update_layout(template='none')
     fig.update_layout(legend_title_text='')
     fig.update_layout(xaxis_title='Zeit', yaxis_title='Kumuliertes Radverkehrsaufkommen')
 
@@ -236,104 +325,7 @@ def stl(dataframe, resample_option, robust_option):
         return res_non_robust.trend, res_non_robust.seasonal, res_non_robust.resid
 
 
-class surface():
-    def year_month(dataframe, calc_option):
-
-        dataframe = dataframe.groupby([dataframe.index.year, dataframe.index.month]).agg(calc_option)
-        dataframe = dataframe.unstack()
-
-        fig = go.Figure(data=[
-            go.Surface(z=dataframe.values, hovertemplate='Jahr: %{y}<br>Monat: %{x}<br>Anzahl: %{z}<extra></extra>')])
-        fig.update_layout(scene=dict(
-            yaxis=dict(
-                title='Jahr',
-                ticktext=dataframe.index.unique().astype(str).tolist(),
-                tickvals=list(range(len(dataframe.index.unique()))),
-                tickmode='array'
-            ),
-            xaxis=dict(
-                title='Monat',
-                ticktext=['JAN', 'FEB', 'MÄR', 'APR', 'MAI', 'JUN', 'JUL', 'AUG', 'SEP', 'OKT', 'NOV', 'DEZ'],
-                tickvals=list(range(len(dataframe.columns))),
-                tickmode='array'
-            ),
-            zaxis=dict(
-                title='Anzahl'
-            ),
-        ),
-            width=1600,
-            height=850,
-            margin=dict(r=10, l=10, b=10, t=10
-                        ))
-        return fig
-
-    def month_week(dataframe, calc_option):
-        import plotly.graph_objects as go
-
-        dataframe = dataframe.groupby([dataframe.index.isocalendar().week, dataframe.index.month]).sum()
-        dataframe = dataframe.unstack()
-
-        fig = go.Figure(data=[go.Surface(z=dataframe.values,
-                                         hovertemplate='Monat: %{x}<br>Stunde: %{y} Uhr<br>Anzahl: %{z}<extra></extra>')])
-        fig.update_layout(scene=dict(
-            xaxis=dict(
-                title='Monat',
-                ticktext=['JAN', 'FEB', 'MÄR', 'APR', 'MAI', 'JUN', 'JUL', 'AUG', 'SEP', 'OKT', 'NOV', 'DEZ'],
-                tickvals=list(range(len(dataframe.columns))),
-                tickmode='array'
-            ),
-
-            yaxis=dict(
-                title='Stunde',
-                ticktext=dataframe.index.unique().astype(str).tolist(),
-                tickvals=list(range(len(dataframe.index.unique()))),
-                tickmode='array'
-            ),
-            zaxis=dict(
-                title='Anzahl'
-            ),
-        ),
-            width=1600,
-            height=850,
-            margin=dict(r=10, l=10, b=10, t=10
-                        ))
-        return fig
-
-    def week_hour(dataframe, calc_option):
-        import plotly.graph_objects as go
-
-        dataframe = dataframe.groupby([dataframe.index.hour, dataframe.index.isocalendar().week]).sum()
-        dataframe = dataframe.unstack()
-
-        fig = go.Figure(data=[go.Surface(z=dataframe.values,
-                                         hovertemplate='Woche: %{x}<br>Stunde: %{y} Uhr<br>Anzahl: %{z}<extra></extra>')])
-        fig.update_layout(scene=dict(
-            xaxis=dict(
-                title='Woche',
-                tickvals=list(range(len(dataframe.columns))),
-                tickmode='array'
-            ),
-
-            yaxis=dict(
-                title='Stunde',
-                ticktext=dataframe.index.unique().astype(str).tolist(),
-                tickvals=list(range(len(dataframe.index.unique()))),
-                tickmode='array'
-            ),
-            zaxis=dict(
-                title='Anzahl'
-            ),
-        ),
-            width=1600,
-            height=850,
-            margin=dict(r=10, l=10, b=10, t=10
-                        ))
-        return fig
-
-
-def plot_Radverkehr_Niederschlag(dataframe, resample_option, path):
-    import plotly.express as px
-
+def radverkehr_niederschlag(dataframe, resample_option):
     if resample_option == 'D':
         dataframe = dataframe.resample('D').agg({dataframe.columns.values[0]: 'sum', dataframe.columns.values[1]: 'sum',
                                                  dataframe.columns.values[2]: 'mean'})
@@ -342,22 +334,17 @@ def plot_Radverkehr_Niederschlag(dataframe, resample_option, path):
 
     fig = px.scatter_3d(dataframe, x=dataframe.index, z=str(dataframe.columns.values[1]), color='Niederschlag',
                         y=str(dataframe.columns.values[0]),
-                        color_continuous_scale=px.colors.sequential.Jet
+                        color_continuous_scale=px.colors.sequential.Jet,
                         )
-    fig.update_layout(template='none')
 
-    config = {'responsive': True, 'displaylogo': False}
+    fig.update_traces(hovertemplate='Datum: %{x} <br>' + 'Anzahl: %{y} <br>' + 'Niederschlag: %{z}')
 
-    dataframe_name = dataframe.columns[0]
-    dataframe_name = remove_umlaut(dataframe_name)
+    fig.update_traces(hoverinfo='all')
 
-    fig.write_html(f'{path}{dataframe_name}_ns3d.html', full_html=False, include_plotlyjs='directory', config=config)
     return fig
 
 
-def plot_Radverkehr_Temperatur(dataframe, resample_option, path):
-    import plotly.express as px
-
+def radverkehr_temperatur(dataframe, resample_option):
     if resample_option == 'D':
         dataframe = dataframe.resample('D').agg({dataframe.columns.values[0]: 'sum', dataframe.columns.values[1]: 'sum',
                                                  dataframe.columns.values[2]: 'mean'})
@@ -369,41 +356,13 @@ def plot_Radverkehr_Temperatur(dataframe, resample_option, path):
                         color_continuous_scale=px.colors.sequential.Jet,
                         )
 
-    # fig.update_traces(hovertemplate='Anzahl: %{y} <br>'+
-    #                  'Temperatur: ${y}' )
+    fig.update_traces(hovertemplate='Datum: %{x} <br>' + 'Anzahl: %{y} <br>' + 'Temperatur: %{z}')
 
-    fig.update_layout(template='none')
+    fig.update_traces(hoverinfo='all')
 
-    config = {'responsive': True, 'displaylogo': False}
-
-    dataframe_name = dataframe.columns[0]
-    dataframe_name = remove_umlaut(dataframe_name)
-
-    fig.write_html(f'{path}{dataframe_name}_temp3d.html', full_html=False, include_plotlyjs='directory', config=config)
+    return fig
 
 
-def plot_Radverkehr_Wetter(dataframe, resample_option, path):
-    import plotly.express as px
 
-    if resample_option == 'D':
-        dataframe = dataframe.resample('D').agg({dataframe.columns.values[0]: 'sum', dataframe.columns.values[1]: 'sum',
-                                                 dataframe.columns.values[2]: 'mean'})
-    else:
-        pass
 
-    fig = px.scatter_3d(dataframe, x=dataframe.index, z=str(dataframe.columns.values[1]), color='Temperatur',
-                        y=str(dataframe.columns.values[0]),
-                        color_continuous_scale=px.colors.sequential.Jet,
-                        )
 
-    # fig.update_traces(hovertemplate='Anzahl: %{y} <br>'+
-    #                  'Temperatur: ${y}' )
-
-    fig.update_layout(template='none')
-
-    config = {'responsive': True, 'displaylogo': False}
-
-    dataframe_name = dataframe.columns[0]
-    dataframe_name = remove_umlaut(dataframe_name)
-
-    fig.write_html(f'{path}{dataframe_name}_wetter.html', full_html=False, include_plotlyjs='directory', config=config)

@@ -51,6 +51,9 @@ def main():
         st_graphs.SelectGraph.surface(selected_dataframes)
     elif graph_type == 'gleitender Mittelwert':
         st_graphs.SelectGraph.moving_av(selected_dataframes)
+    elif graph_type == 'Radverkehr und Wetter':
+        st_graphs.SelectGraph.wetter(selected_dataframes)
+
 
 
 

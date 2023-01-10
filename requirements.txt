@@ -2,4 +2,4 @@ streamlit==1.16.0
 pandas==1.4.3
 plotly==5.11.0
 numpy==1.23.0
-statsmodels==ß.13.0
+statsmodels==1.13.0

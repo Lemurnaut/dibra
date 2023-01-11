@@ -35,7 +35,7 @@ class SelectGraph():
         components.html(src, height=600, scrolling=False)
 
         st.write(
-            'Das inoffizielle Radstationen Analysetool (DIBRA) wurde entwickelt, um interessierten Benutzer:innen einen tieferen Einblick in die Daten der Bremer Radzählstationen (https://vmz.bremen.de/radzaehlstationen/) zu bieten. Dafür stellt RaStA verschiedene Diagrammtypen als Werkzeuge zu Verfügung. Darüber hinaus ist es möglich, die Daten der Radzählstationen mit anderen Datensätzen - zum Beispiel des Deutschen Wetterdienstes (www.dwd.de) - zu verknüpfen.')
+            'Das inoffizielle Radstationen Analysetool (DIBRA) wurde entwickelt, um interessierten Benutzer*innen einen tieferen Einblick in die Daten der Bremer Radzählstationen (https://vmz.bremen.de/radzaehlstationen/) zu bieten. Dafür stellt RaStA verschiedene Diagrammtypen als Werkzeuge zu Verfügung. Darüber hinaus ist es möglich, die Daten der Radzählstationen mit anderen Datensätzen - zum Beispiel des Deutschen Wetterdienstes (www.dwd.de) - zu verknüpfen.')
         st.write(
             'An der linken Bildschirmleiste befindet sich das Optionsmenü. Hier können die Grundeinstellungen zu den Radzählstationen, dem Zeitraum und des Diagrammtyps vorgenommen werden. Je nach gewähltem Diagrammtyp stehen weitere Optionen zu Verfügung')
 

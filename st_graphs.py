@@ -34,6 +34,11 @@ class SelectGraph():
         src = '<iframe width="100%" height="600px" frameborder="0" allowfullscreen src="//umap.openstreetmap.fr/de/map/unbenannte-karte_570969?scaleControl=false&miniMap=false&scrollWheelZoom=false&zoomControl=true&allowEdit=false&moreControl=true&searchControl=null&tilelayersControl=null&embedControl=null&datalayersControl=true&onLoadPanel=undefined&captionBar=false"></iframe>'
         components.html(src, height=600, scrolling=False)
 
+        st.write(
+            'Das inoffizielle Radstationen Analysetool (DIBRA) wurde entwickelt, um interessierten Benutzer:innen einen tieferen Einblick in die Daten der Bremer Radzählstationen (https://vmz.bremen.de/radzaehlstationen/) zu bieten. Dafür stellt RaStA verschiedene Diagrammtypen als Werkzeuge zu Verfügung. Darüber hinaus ist es möglich, die Daten der Radzählstationen mit anderen Datensätzen - zum Beispiel des Deutschen Wetterdienstes (www.dwd.de) - zu verknüpfen.')
+        st.write(
+            'An der linken Bildschirmleiste befindet sich das Optionsmenü. Hier können die Grundeinstellungen zu den Radzählstationen, dem Zeitraum und des Diagrammtyps vorgenommen werden. Je nach gewähltem Diagrammtyp stehen weitere Optionen zu Verfügung')
+
         with st.expander('Stationstabelle / Beginn der Messungen'):
             Stationstabelle = {'Stationsname': ['Wilhelm-Kaisen-Brücke (West)',
                                                 'Wilhelm-Kaisen-Brücke (Ost)',
@@ -66,6 +71,8 @@ class SelectGraph():
             stationstabelle = stationstabelle.drop(columns={stationstabelle.columns[0]})
             st.markdown('Tabelle der Radzählstationen und Zeitpunkt des ersten Wertes größer als Null:')
             st.table(stationstabelle)
+
+            st.write('©2022 www.moin-stefko.de / mail: hallo@moin-stefko.de')
 
     def overview(dataframe_list):
         st.header('Übersicht')

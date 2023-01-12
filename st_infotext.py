@@ -10,6 +10,6 @@ class method_info(object):
           'Diagrammoptionen:'
 
     wetter = 'Zeigt das Radverkehrsaufkommen in Kombination mit den Temperatur und Niederschlagsdaten des Deutschen' \
-             ' Wetterdienst an. das Radverkehrsaufkommen und der Niederschlag werden als tägliche Summe, die Temperatur' \
+             ' Wetterdienst an. Das Radverkehrsaufkommen und der Niederschlag werden als tägliche Summe, die Temperatur' \
              ' als Tagesdurchschnitt angezeigt.'
 

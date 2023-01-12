@@ -90,7 +90,7 @@ class SelectGraph():
             st.dataframe(data=x.stats, use_container_width=True)
 
     def cumsum(dataframe_list):
-        st.header('Kummulierte Summen')
+        st.header('Kumulierte Summen')
         for dataframe in dataframe_list:
             x = get_values(dataframe)
 

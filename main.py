@@ -42,7 +42,7 @@ def main():
         st_graphs.SelectGraph.info()
     elif graph_type == 'Übersicht':
         st_graphs.SelectGraph.overview(selected_dataframes)
-    elif graph_type == 'Kummulationen':
+    elif graph_type == 'Kumulationen':
         st_graphs.SelectGraph.cumsum(selected_dataframes)
     elif graph_type == 'Tagesverlauf':
         st_graphs.SelectGraph.week_dist(selected_dataframes)

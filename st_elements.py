@@ -87,7 +87,7 @@ def sidebar_station_select(dataframe_list):
 def sidebar_graph_select():
     selected_graph = st.sidebar.radio('Diagrammtyp',['Info',
                                                         'Übersicht',
-                                                        'Kummulationen',
+                                                        'Kumulationen',
                                                         'Tagesverlauf',
                                                         'gleitender Mittelwert',
                                                         'Saison-Trend-Zerlegung',
@@ -97,12 +97,13 @@ def sidebar_graph_select():
     return selected_graph
 
 def stl_options():
-    st.sidebar.write('STL Optionen')
+    st.sidebar.markdown('**Diagrammoptionen**')
     resample_option = st.sidebar.selectbox('Abtastrate/Funktion', ('täglich/Summe', 'täglich/Mittelwert', 'monatlich/Summe', 'monatlich/Mittelwert'))
     robust_option = st.sidebar.selectbox('Robustheit', ('robust', 'non robust'))
     return resample_option, robust_option
 
 def surface_options():
+    st.sidebar.markdown('**Diagrammoptionen**')
     plot_option = st.sidebar.selectbox('Typ', ('Jahr/Monat', 'Wochen/Stunden'))
     calc_option = st.sidebar.selectbox('Summen/Mittelwerte', ('Summen', 'Mittelwerte'))
     if calc_option == 'Summen':
@@ -112,11 +113,10 @@ def surface_options():
     return  plot_option, calc_option
 
 def ma_options(dataframe):
-    st.sidebar.markdown('Optionen gleitender Mittelwert')
-    moving_average_options = str([*range(1, dataframe.count()[0])])
+    st.sidebar.markdown('**Diagrammoptionen**')
     moving_average_window = st.sidebar.slider(
         'Größe des sich bewegenden Fensters. Enthält die Anzahl der Beobachtungen, die zur Berechnung gleitenden Mittelwertes verwendet werden.', min_value=0, max_value=int(dataframe.count()[0] / 24))
-    moving_average_period = st.sidebar.slider('Erforderliche Mindestanzahl von Beobachtungen im Fenster', min_value=0,
+    moving_average_period = st.sidebar.slider('Erforderliche Mindestanzahl von Beobachtungen im oben definierten Fenster.', min_value=0,
                                               max_value=int(dataframe.count()[0] / 24))
 
     return moving_average_window, moving_average_period

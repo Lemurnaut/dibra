@@ -4,6 +4,7 @@ import pandas
 import plot
 import preprocess
 import st_elements
+import st_infotext
 
 class get_values(object):
     def __init__(self, dataframe):
@@ -35,7 +36,7 @@ class SelectGraph():
         components.html(src, height=600, scrolling=False)
 
         st.write(
-            'Das inoffizielle Radstationen Analysetool (DIBRA) wurde entwickelt, um interessierten Benutzer*innen einen tieferen Einblick in die Daten der Bremer Radzählstationen (https://vmz.bremen.de/radzaehlstationen/) zu bieten. Dafür stellt RaStA verschiedene Diagrammtypen als Werkzeuge zu Verfügung. Darüber hinaus ist es möglich, die Daten der Radzählstationen mit anderen Datensätzen - zum Beispiel des Deutschen Wetterdienstes (www.dwd.de) - zu verknüpfen.')
+            'Das inoffizielle Radstationen Analysetool (DIBRA) wurde entwickelt, um interessierten Benutzer*innen einen tieferen Einblick in die Daten der Bremer Radzählstationen (https://vmz.bremen.de/radzaehlstationen/) zu bieten. Dafür stehen verschiedene Diagrammtypen als Werkzeuge zu Verfügung. Darüber hinaus werden die Daten der Radzählstationen Daten des Deutschen Wetterdienstes (www.dwd.de) verknüpft.')
         st.write(
             'An der linken Bildschirmleiste befindet sich das Optionsmenü. Hier können die Grundeinstellungen zu den Radzählstationen, dem Zeitraum und des Diagrammtyps vorgenommen werden. Je nach gewähltem Diagrammtyp stehen weitere Optionen zu Verfügung')
 
@@ -101,22 +102,27 @@ class SelectGraph():
 
     def week_dist(dataframe_list):
         st.header('Radverkehr im Tagesverlauf')
+        st.write('Die Diagramme zeigen das durchschnittliche Radverkehrsaufkommen zur jeweiligen Uhrzeit an den Wochentagen, bzw. Werktagen und Wochenendtagen an.')
         for dataframe in dataframe_list:
             x = get_values(dataframe)
 
             st.subheader(dataframe.columns[0])
             st.write(f'{x.index_date_min} bis {x.index_date_max} zwischen {x.index_time_min} Uhr und {x.index_time_max} Uhr')
 
-            st.write('Werktage & Wochenende')
-            fig = plot.week_dist(dataframe)
-            st.plotly_chart(fig, theme="streamlit", use_container_width=True)
-
             st.write('Wochentage')
             fig, dataframe_first_monday, dataframe_last_sunday = plot.weekdays(dataframe)
             st.plotly_chart(fig, theme="streamlit", use_container_width=True)
 
+            st.write('Werktage & Wochenende')
+            fig = plot.week_dist(dataframe)
+            st.plotly_chart(fig, theme="streamlit", use_container_width=True)
+
+
     def stl(dataframe_list):
         st.header('Saison-Trend-Zerlegung')
+        st.markdown('Zerlegt die Zeitreihe in Trend-, Saison- und Restkomponenten unter Verwendung einer lokalen linearen Kernregression.')
+        with st.expander('Mehr Informationen'):
+            st.write(st_infotext.method_info.stl)
 
         resample_option, robust_option = st_elements.stl_options()
 
@@ -143,6 +149,7 @@ class SelectGraph():
 
     def surface(dataframe_list):
         st.header('Oberflächendiagramm')
+        st.write('Stellt das Radverkehrsaufkommen als Oberfläche dar.')
         plot_option, calc_option = st_elements.surface_options()
 
         for dataframe in dataframe_list:
@@ -161,6 +168,7 @@ class SelectGraph():
 
     def moving_av(dataframe_list):
         st.header('Gleitdender Mittelwert')
+        st.write('Zeigt den gleitenden Mittelwert der Zeitreihe als Kurve an.')
         for dataframe in dataframe_list:
             x = get_values(dataframe)
 
@@ -173,10 +181,12 @@ class SelectGraph():
                 fig = plot.moving_av(dataframe, window, periods)
                 st.plotly_chart(fig, theme="streamlit", use_container_width=True)
             except ValueError:
-                st.warning('Fehler! Fenster muss größer als die Mindesanzahl der Beobachtungen sein.', icon="⚠️")
+                st.warning(f'Fehler! Größe des sich bewegenden Fensters muss kleiner sein als die erforderliche Mindestanzahl von Beobachtungen im Fenster. Du hast {window} als Größe für das fenster und{periods} als Mindestanzahl der Messwerte im Fenster ausgewählt.', icon='⚠️')
 
     def wetter(dataframe_list):
         st.header('Radverkehr und Wetter')
+        with st.expander('Mehr Informationen'):
+            st.write(st_infotext.method_info.wetter)
         for dataframe in dataframe_list:
             x = get_values(dataframe)
 

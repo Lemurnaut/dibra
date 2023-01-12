@@ -118,8 +118,6 @@ def moving_av(dataframe, window, periods):
     return fig
 
 def week_dist(dataframe):
-    dataframe_name = dataframe.columns[0]
-
     weekend = np.where(dataframe.index.weekday < 5, 'Weekday', 'Weekend')
     by_time = dataframe.groupby([weekend, dataframe.index.time]).mean().round()
 
@@ -150,30 +148,28 @@ def weekdays(dataframe):
     dataframe_last_sunday = (dataframe_enddate - dataframe_enddate.weekday() * dt.timedelta(days=1)) + dt.timedelta(
         days=6)
 
-    dataframe_name = dataframe.columns[0]
-
     dataframe = dataframe.loc[dataframe_first_monday: dataframe_last_sunday]
 
     weekday = np.where(dataframe.index.weekday == 0, 'Montag', 'restofweek')
-    monday = dataframe.groupby([weekday, dataframe.index.time]).mean()
+    monday = dataframe.groupby([weekday, dataframe.index.time]).mean().round()
 
     weekday = np.where(dataframe.index.weekday == 1, 'Dienstag', 'restofweek')
-    tuesday = dataframe.groupby([weekday, dataframe.index.time]).mean()
+    tuesday = dataframe.groupby([weekday, dataframe.index.time]).mean().round()
 
     weekday = np.where(dataframe.index.weekday == 2, 'Mittwoch', 'restofweek')
-    wednesday = dataframe.groupby([weekday, dataframe.index.time]).mean()
+    wednesday = dataframe.groupby([weekday, dataframe.index.time]).mean().round()
 
     weekday = np.where(dataframe.index.weekday == 3, 'Donnerstag', 'restofweek')
-    thursday = dataframe.groupby([weekday, dataframe.index.time]).mean()
+    thursday = dataframe.groupby([weekday, dataframe.index.time]).mean().round()
 
     weekday = np.where(dataframe.index.weekday == 4, 'Freitag', 'restofweek')
-    friday = dataframe.groupby([weekday, dataframe.index.time]).mean()
+    friday = dataframe.groupby([weekday, dataframe.index.time]).mean().round()
 
     weekday = np.where(dataframe.index.weekday == 5, 'Sonnabend', 'restofweek')
-    saturday = dataframe.groupby([weekday, dataframe.index.time]).mean()
+    saturday = dataframe.groupby([weekday, dataframe.index.time]).mean().round()
 
     weekday = np.where(dataframe.index.weekday == 6, 'Sonntag', 'restofweek')
-    sunday = dataframe.groupby([weekday, dataframe.index.time]).mean()
+    sunday = dataframe.groupby([weekday, dataframe.index.time]).mean().round()
 
     merge_1 = pandas.DataFrame(monday.xs('Montag'))
     merge_1 = merge_1.rename(columns={merge_1.columns[0]: 'Montag'})
@@ -334,7 +330,7 @@ def radverkehr_niederschlag(dataframe, resample_option):
 
     fig = px.scatter_3d(dataframe, x=dataframe.index, z=str(dataframe.columns.values[1]), color='Niederschlag',
                         y=str(dataframe.columns.values[0]),
-                        color_continuous_scale=px.colors.sequential.Jet,
+                        color_continuous_scale=px.colors.sequential.Jet, height=800
                         )
 
     fig.update_traces(hovertemplate='Datum: %{x} <br>' + 'Anzahl: %{y} <br>' + 'Niederschlag: %{z}')
@@ -347,13 +343,13 @@ def radverkehr_niederschlag(dataframe, resample_option):
 def radverkehr_temperatur(dataframe, resample_option):
     if resample_option == 'D':
         dataframe = dataframe.resample('D').agg({dataframe.columns.values[0]: 'sum', dataframe.columns.values[1]: 'sum',
-                                                 dataframe.columns.values[2]: 'mean'})
+                                                 dataframe.columns.values[2]: 'mean'}).round()
     else:
         pass
 
     fig = px.scatter_3d(dataframe, x=dataframe.index, z=str(dataframe.columns.values[2]), color='Temperatur',
                         y=str(dataframe.columns.values[0]),
-                        color_continuous_scale=px.colors.sequential.Jet,
+                        color_continuous_scale=px.colors.sequential.Jet, height=800
                         )
 
     fig.update_traces(hovertemplate='Datum: %{x} <br>' + 'Anzahl: %{y} <br>' + 'Temperatur: %{z}')

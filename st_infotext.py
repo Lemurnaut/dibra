@@ -9,7 +9,6 @@ class method_info(object):
           'Saison-Trend-Zerlegung (MSTL) steht in der verwendeten Version des Statistikmoduls noch nicht zu Verfügung.' \
           'Diagrammoptionen:'
 
-    wetter = 'Zeigt das Radverkehrsaufkommen in Kombination mit den Temperatur und Niederschlagsdaten des Deutschen' \
-             ' Wetterdienst an. Das Radverkehrsaufkommen und der Niederschlag werden als tägliche Summe, die Temperatur' \
+    wetter = 'Das Radverkehrsaufkommen und der Niederschlag werden als tägliche Summe, die Temperatur' \
              ' als Tagesdurchschnitt angezeigt.'
 

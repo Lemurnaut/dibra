@@ -38,7 +38,7 @@ class SelectGraph():
         st.write(
             'Das inoffizielle Radstationen Analysetool (DIBRA) wurde entwickelt, um interessierten Benutzer*innen einen tieferen Einblick in die Daten der Bremer Radzählstationen (https://vmz.bremen.de/radzaehlstationen/) zu bieten. Dafür stehen verschiedene Diagrammtypen als Werkzeuge zu Verfügung. Darüber hinaus werden die Daten der Radzählstationen Daten des Deutschen Wetterdienstes (www.dwd.de) verknüpft.')
         st.write(
-            'An der linken Bildschirmleiste befindet sich das Optionsmenü. Hier können die Grundeinstellungen zu den Radzählstationen, dem Zeitraum und des Diagrammtyps vorgenommen werden. Je nach gewähltem Diagrammtyp stehen weitere Optionen zu Verfügung')
+            'An der linken Bildschirmleiste befindet sich das Optionsmenü. Hier können die Grundeinstellungen zu den Radzählstationen, dem Zeitraum und des Diagrammtyps vorgenommen werden. Je nach gewähltem Diagrammtyp stehen weitere Optionen zu Verfügung.')
 
         with st.expander('Stationstabelle / Beginn der Messungen'):
             Stationstabelle = {'Stationsname': ['Wilhelm-Kaisen-Brücke (West)',
@@ -73,7 +73,10 @@ class SelectGraph():
             st.markdown('Tabelle der Radzählstationen und Zeitpunkt des ersten Wertes größer als Null:')
             st.table(stationstabelle)
 
-            st.write('©2022 www.moin-stefko.de / mail: hallo@moin-stefko.de')
+        st.write('Quelle Radverkehrsdaten: [VerkehrsManagementZentrale Bremen](https://vmz.bremen.de/rad/radzaehlstationen-abfrage)')
+        st.write('Quelle Wetterdaten: [Deutscher Wetterdienst](https://www.dwd.de)')
+
+        st.write('©2022 www.moin-stefko.de / mail: hallo@moin-stefko.de')
 
     def overview(dataframe_list):
         st.header('Übersicht')
@@ -182,6 +185,8 @@ class SelectGraph():
 
     def wetter(dataframe_list):
         st.header('Radverkehr und Wetter')
+        st.write('Zeigt das Radverkehrsaufkommen in Kombination mit den Temperatur- und Niederschlagsdaten des Deutschen' \
+             ' Wetterdienst an.')
         with st.expander('Mehr Informationen'):
             st.write(st_infotext.method_info.wetter)
         for dataframe in dataframe_list:
@@ -204,6 +209,8 @@ class SelectGraph():
             st.write('Radverkehr und Niederschlag')
             fig = plot.radverkehr_niederschlag(bikewetter, 'D')
             st.plotly_chart(fig, theme="streamlit", use_container_width=True)
+
+            st.write('Quelle Wetterdaten: dwd.de')
 
 
 

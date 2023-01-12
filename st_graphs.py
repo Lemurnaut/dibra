@@ -86,11 +86,11 @@ class SelectGraph():
 
             st.subheader(dataframe.columns[0])
             st.write(f'vom {x.index_date_min} bis {x.index_date_max}, zwischen {x.index_time_min} Uhr und {x.index_time_max} Uhr.')
+            st.write(f'Maximalwert: {x.max}, am {x.idxmax_date} um {x.idxmax_time} Uhr')
 
             st.line_chart(dataframe)
 
-            st.write(f'Maximalwert: {x.max} am {x.idxmax_date} um {x.idxmax_time} Uhr')
-
+            st.write('Statistische Grundwerte')
             st.dataframe(data=x.stats, use_container_width=True)
 
     def cumsum(dataframe_list):

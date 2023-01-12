@@ -33,8 +33,6 @@ def main():
     startdate, enddate = st_elements.sidebar_date()
     starttime, endtime = st_elements.sidebar_time()
 
-    st.write(starttime, endtime)
-
     selected_dataframes = st_elements.sidebar_station_select(dataframe_list)
     selected_dataframes = [(dataframe.loc[startdate : enddate].between_time(starttime, endtime)) for dataframe in selected_dataframes]
 

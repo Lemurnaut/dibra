@@ -81,7 +81,7 @@ class SelectGraph():
             x = get_values(dataframe)
 
             st.subheader(dataframe.columns[0])
-            st.write(f'{x.index_date_min} bis {x.index_date_max} zwischen {x.index_time_min} Uhr und {x.index_time_max} Uhr')
+            st.write(f'vom {x.index_date_min} bis {x.index_date_max}, zwischen {x.index_time_min} Uhr und {x.index_time_max} Uhr.')
 
             st.line_chart(dataframe)
 
@@ -107,7 +107,7 @@ class SelectGraph():
             x = get_values(dataframe)
 
             st.subheader(dataframe.columns[0])
-            st.write(f'{x.index_date_min} bis {x.index_date_max} zwischen {x.index_time_min} Uhr und {x.index_time_max} Uhr')
+            st.write(f'vom {x.index_date_min} bis {x.index_date_max}, zwischen {x.index_time_min} Uhr und {x.index_time_max} Uhr.')
 
             st.write('Wochentage')
             fig, dataframe_first_monday, dataframe_last_sunday = plot.weekdays(dataframe)
@@ -132,8 +132,7 @@ class SelectGraph():
             x = get_values(dataframe)
 
             st.subheader(dataframe.columns[0])
-            st.write(
-                f'{x.index_date_min} bis {x.index_date_max} zwischen {x.index_time_min} Uhr und {x.index_time_max} Uhr')
+            st.write(f'vom {x.index_date_min} bis {x.index_date_max}, zwischen {x.index_time_min} Uhr und {x.index_time_max} Uhr.')
 
             st.line_chart(trend)
 
@@ -156,8 +155,7 @@ class SelectGraph():
             x = get_values(dataframe)
 
             st.subheader(dataframe.columns[0])
-            st.write(
-                f'{x.index_date_min} bis {x.index_date_max} zwischen {x.index_time_min} Uhr und {x.index_time_max} Uhr')
+            st.write(f'vom {x.index_date_min} bis {x.index_date_max}, zwischen {x.index_time_min} Uhr und {x.index_time_max} Uhr.')
 
             if plot_option == 'Jahr/Monat':
                 fig = plot.surface.year_month(dataframe, calc_option)
@@ -173,8 +171,7 @@ class SelectGraph():
             x = get_values(dataframe)
 
             st.subheader(dataframe.columns[0])
-            st.write(
-                f'{x.index_date_min} bis {x.index_date_max} zwischen {x.index_time_min} Uhr und {x.index_time_max} Uhr')
+            st.write(f'vom {x.index_date_min} bis {x.index_date_max}, zwischen {x.index_time_min} Uhr und {x.index_time_max} Uhr.')
 
             window, periods = st_elements.ma_options(dataframe)
             try:
@@ -191,8 +188,7 @@ class SelectGraph():
             x = get_values(dataframe)
 
             st.subheader(dataframe.columns[0])
-            st.write(
-                f'{x.index_date_min} bis {x.index_date_max} zwischen {x.index_time_min} Uhr und {x.index_time_max} Uhr')
+            st.write(f'vom {x.index_date_min} bis {x.index_date_max}, zwischen {x.index_time_min} Uhr und {x.index_time_max} Uhr.')
 
             wetter_start = str(dataframe.index.min())
             wetter_end = str(dataframe.index.max())

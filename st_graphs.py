@@ -78,6 +78,7 @@ class SelectGraph():
 
         st.write('©2022 www.moin-stefko.de / mail: hallo@moin-stefko.de')
 
+
     def overview(dataframe_list):
         st.header('Übersicht')
         for dataframe in dataframe_list:
@@ -94,6 +95,9 @@ class SelectGraph():
 
     def cumsum(dataframe_list):
         st.header('Kumulierte Summen')
+        st.write('Zeigt das aufsummierte Radverkehrsaufkommen an.')
+        with st.expander('Mehr Informationen'):
+            st.write(st_infotext.method_info.cumsum)
         for dataframe in dataframe_list:
             x = get_values(dataframe)
 
@@ -123,7 +127,7 @@ class SelectGraph():
 
     def stl(dataframe_list):
         st.header('Saison-Trend-Zerlegung')
-        st.markdown('Zerlegt die Zeitreihe in Trend-, Saison- und Restkomponenten unter Verwendung einer lokalen linearen Kernregression.')
+        st.write('Zerlegt die Zeitreihe in Trend-, Saison- und Restkomponenten unter Verwendung einer lokalen linearen Kernregression.')
         with st.expander('Mehr Informationen'):
             st.write(st_infotext.method_info.stl)
 

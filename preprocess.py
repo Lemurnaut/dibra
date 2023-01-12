@@ -6,7 +6,7 @@ from wetterdienst.provider.dwd.observation import DwdObservationRequest, DwdObse
 from wetterdienst import Settings
 
 
-def download_data():
+def download_data(end_date):
     station_id = ['100044202',
                  '100000575',
                  '100002926',
@@ -20,10 +20,9 @@ def download_data():
                  '100047799',
                  '100047805',
                  ]
-    today = dt.date.today()
 
     data_startdate = '2012-01-01'
-    data_enddate = str(dt.date.today() - dt.timedelta(1))
+    data_enddate = end_date
 
     source = f'https://vmz.bremen.de/radzaehler-api/?action=Values&apiFormat=csv&resolution=hourly&startDate={data_startdate}&endDate={data_enddate}'
 

@@ -21,12 +21,12 @@ col1, col2 = st.columns(2)
 
 
 @st.cache
-def download():
-    dataframe = preprocess.download_data()
+def download(end_date):
+    dataframe = preprocess.download_data(end_date)
     return dataframe
 
 def main():
-    dataframe_source = download()
+    dataframe_source = download(end_date=(dt.date.today() - dt.timedelta(1)))
     dataframe_list =  preprocess.dataframe_to_list(dataframe_source)
 
     startdate, enddate = st_elements.sidebar_date()

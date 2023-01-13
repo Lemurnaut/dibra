@@ -4,6 +4,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 from statsmodels.tsa.seasonal import STL
 import datetime as dt
+from functools import reduce
 
 class surface():
     def year_month(dataframe, calc_option):
@@ -359,73 +360,135 @@ def radverkehr_temperatur(dataframe, resample_option):
     return fig
 
 def sankey(dataframe_list):
-    label = ['Wilhelm-Kaisen-Brücke (Ost)',
-             'Wilhelm-Kaisen-Brücke (West)',
-             'Langemarckstraße (Ostseite)',
-             'Langemarckstraße (Westseite)',
-             'Radweg Kleine Weser',
-             'Graf-Moltke-Straße (Ostseite)',
-             'Graf-Moltke-Straße (Westseite)',
-             'Schwachhauser Ring',
-             'Wachmannstraße auswärts (Süd)',
-             'Wachmannstraße einwärts (Nord)',
-             'Osterdeich',
-             'Hastedter Brückenstraße',
+    tmp_frame = reduce(lambda a, b: a.add(b, fill_value=0), dataframe_list)
+    sum_all_stations = pandas.DataFrame(tmp_frame.sum(axis=1)).sum()[0]
+    del tmp_frame
 
-             'Wilhelm-Kaisen-Brücke',
-             'Langemarckstraße',
-             'Graf-Moltke-Straße',
-             'Wachmannstraße',
-            ]
+    label = ['Wilhelm-Kaisen-Brücke (Ost)',  # 0
+             'Wilhelm-Kaisen-Brücke (West)',  # 1
+             'Langemarckstraße (Ostseite)',  # 2
+             'Langemarckstraße (Westseite)',  # 3
+             'Radweg Kleine Weser',  # 4
+             'Graf-Moltke-Straße (Ostseite)',  # 5
+             'Graf-Moltke-Straße (Westseite)',  # 6
+             'Schwachhauser Ring',  # 7
+             'Wachmannstraße auswärts (Süd)',  # 8
+             'Wachmannstraße einwärts (Nord)',  # 9
+             'Osterdeich',  # 10
+             'Hastedter Brückenstraße',  # 11
 
+             'Wilhelm-Kaisen-Brücke',  # 12
+             'Langemarckstraße',  # 13
+             'Graf-Moltke-Straße',  # 14
+             'Wachmannstraße',  # 15
 
-    source = [0,1,2,3,4,5,6,7,8,9,10,11,
-              12,13,14,15
+             'Gesamtaufkommen alle Stationen'  # last node (sum of all stations)
              ]
-    target = [12,12,13,13,16,14,14,16,15,15,16,16,
-              16,16,16,16
+
+    color = ['rgba(25, 55, 55, 0.5)',  # 0
+             'rgba(25, 55, 55, 0.25)',  # 1
+             'rgba(25, 55, 55, 0.5)',  # 2
+             'rgba(25, 55, 55, 0.25)',  # 3
+             'rgba(25, 55, 55, 0.6)',  # 4
+             'rgba(25, 55, 55, 0.5)',  # 5
+             'rgba(25, 55, 55, 0.25)',  # 6
+             'rgba(25, 55, 55, 0.6)',  # 7
+             'rgba(25, 55, 55, 0.5)',  # 8
+             'rgba(25, 55, 55, 0.25)',  # 9
+             'rgba(25, 55, 55, 0.6)',  # 10
+             'rgba(25, 55, 55, 0.6)',  # 11
+             'rgba(25, 55, 55, 0.6)',  # 12
+             'rgba(25, 55, 55, 0.6)',  # 13
+             'rgba(25, 55, 55, 0.6)',  # 14
+             'rgba(25, 55, 55, 0.6)',  # 15
+             'rgba(25, 55, 55, 0.8)'  # last node (sum of all stations)
              ]
-    value = [dataframe_list[0].sum()[0],
-             dataframe_list[1].sum()[0],
-             dataframe_list[2].sum()[0],
-             dataframe_list[3].sum()[0],
-             dataframe_list[4].sum()[0],
-             dataframe_list[5].sum()[0],
-             dataframe_list[6].sum()[0],
-             dataframe_list[7].sum()[0],
-             dataframe_list[8].sum()[0],
-             dataframe_list[9].sum()[0],
-             dataframe_list[10].sum()[0],
-             dataframe_list[11].sum()[0],
 
-             dataframe_list[0].sum()[0] + dataframe_list[1].sum()[0],
-             dataframe_list[2].sum()[0] + dataframe_list[3].sum()[0],
-             dataframe_list[5].sum()[0] + dataframe_list[6].sum()[0],
-             dataframe_list[8].sum()[0] + dataframe_list[9].sum()[0],
-            ]
+    source = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11,
+              12, 13, 14, 15
+              ]
+    target = [12, 12, 13, 13, 16, 14, 14, 16, 15, 15, 16, 16,
+              16, 16, 16, 16
+              ]
+    value = [dataframe_list[0].sum()[0],  # 0
+             dataframe_list[1].sum()[0],  # 1
+             dataframe_list[2].sum()[0],  # 2
+             dataframe_list[3].sum()[0],  # 3
+             dataframe_list[4].sum()[0],  # 4
+             dataframe_list[5].sum()[0],  # 5
+             dataframe_list[6].sum()[0],  # 6
+             dataframe_list[7].sum()[0],  # 7
+             dataframe_list[8].sum()[0],  # 8
+             dataframe_list[9].sum()[0],  # 9
+             dataframe_list[10].sum()[0],  # 10
+             dataframe_list[11].sum()[0],  # 11
 
+             dataframe_list[0].sum()[0] + dataframe_list[1].sum()[0],  # 12
+             dataframe_list[2].sum()[0] + dataframe_list[3].sum()[0],  # 13
+             dataframe_list[5].sum()[0] + dataframe_list[6].sum()[0],  # 14
+             dataframe_list[8].sum()[0] + dataframe_list[9].sum()[0],  # 15
+             ]
+
+    customdata_node = [dataframe_list[0].columns[0],  # 0
+                       dataframe_list[1].columns[0],  # 1
+                       dataframe_list[2].columns[0],  # 2
+                       dataframe_list[3].columns[0],  # 3
+                       dataframe_list[4].columns[0],  # 4
+                       dataframe_list[5].columns[0],  # 5
+                       dataframe_list[6].columns[0],  # 6
+                       dataframe_list[7].columns[0],  # 7
+                       dataframe_list[8].columns[0],  # 8
+                       dataframe_list[9].columns[0],  # 9
+                       dataframe_list[10].columns[0],  # 10
+                       dataframe_list[11].columns[0],  # 11
+                       'Wilhelm-Kaisen-Brücke (Gesamt)',  # 12
+                       'Langemarckstraße (Gesamt)',  # 13
+                       'Graf-Moltke-Straße (Gesamt)',  # 14
+                       'Wachmannstraße (Gesamt)',  # 15
+                       'Alle Stationen'  # last node (sum of all stations)
+                       ]
+
+    customdata_link = [(value[0] * 100 / value[12]).round(),  # 0
+                       (value[1] * 100 / value[12]).round(),  # 1
+                       (value[2] * 100 / value[13]).round(),  # 2
+                       (value[3] * 100 / value[13]).round(),  # 3
+                       (value[4] * 100 / sum_all_stations).round(),  # 4
+                       (value[5] * 100 / value[14]).round(),  # 5
+                       (value[6] * 100 / value[14]).round(),  # 6
+                       (value[7] * 100 / sum_all_stations).round(),  # 7
+                       (value[8] * 100 / value[15]).round(),  # 8
+                       (value[9] * 100 / value[15]).round(),  # 9
+                       (value[10] * 100 / sum_all_stations).round(),  # 10
+                       (value[11] * 100 / sum_all_stations).round(),  # 11
+                       (value[12] * 100 / sum_all_stations).round(),  # 12
+                       (value[13] * 100 / sum_all_stations).round(),  # 13
+                       (value[14] * 100 / sum_all_stations).round(),  # 14
+                       (value[15] * 100 / sum_all_stations).round(),  # 15
+                       ]
 
     fig = go.Figure(data=[go.Sankey(
-        node = dict(
-          pad = 10,
-          thickness =20,
-          line = dict(color = "black", width = 0.1),
-          label = label,
-          color = "grey",
+        node=dict(
+            pad=10,
+            thickness=20,
+            line=dict(color="black", width=0.1),
+            label=label,
+            color=color,
+            customdata=customdata_node,
+            hovertemplate='%{customdata} <br>' +
+                          'gemessenes Aufkommen:%{value}<extra></extra>'
         ),
-        link = dict(
-          source = source, # indices correspond to labels, eg A1, A2, A1, B1, ...
-          target = target,
-          value = value
-      ))])
+        link=dict(
+            source=source,  # indices correspond to labels, eg A1, A2, A1, B1, ...
+            target=target,
+            value=value,
+            color=color,
+            customdata=customdata_link,
+            hovertemplate='Anteil an %{target.customdata}: %{customdata} Prozent<extra></extra>',
 
-    fig.update_layout(hovermode = 'x')
+        ))])
+
+    fig.update_layout(hovermode='x')
 
     fig.update_layout(height=800)
 
     return fig
-
-
-
-
-

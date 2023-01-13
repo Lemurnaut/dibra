@@ -230,9 +230,10 @@ class SelectGraph():
 
     def sankey(dataframe_list):
         st.header('Zusammensetzung Radverkehrsaufkommen')
-        st.write('Zeigt die Verteilung des Radverkehrsaufkommens nach Radzählstation an.')
+        st.write('Zeigt den Anteil der Radzählstationen am gemessenen Radverkehrsaufkommen.')
         with st.expander('Mehr Informationen'):
             st.write(st_infotext.method_info.sankey)
+            st.info('Hinweis: Die Auswahl von Radzählstationen hat keinen Einfluss auf die Darstellung.', icon='ℹ️')
 
         fig = plot.sankey(dataframe_list)
         st.plotly_chart(fig, theme="streamlit", use_container_width=True)

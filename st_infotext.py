@@ -22,5 +22,5 @@ class method_info(object):
              'statologie.de/kumulative-summe-r/).'
 
 
-    sankey = 'Hinweis: Die Auswahl von Radzählstationen hat keinen Einfluss auf die Darstellung.'
+    sankey = 'Die *Quellen* zeigen das absolute Radverkehrsaufkommen an. Die *Links* zeigen das prozentuale Radverkehrsaufkommen an.'
 

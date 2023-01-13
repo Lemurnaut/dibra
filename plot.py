@@ -358,6 +358,73 @@ def radverkehr_temperatur(dataframe, resample_option):
 
     return fig
 
+def sankey(dataframe_list):
+    label = ['Wilhelm-Kaisen-Brücke (Ost)',
+             'Wilhelm-Kaisen-Brücke (West)',
+             'Langemarckstraße (Ostseite)',
+             'Langemarckstraße (Westseite)',
+             'Radweg Kleine Weser',
+             'Graf-Moltke-Straße (Ostseite)',
+             'Graf-Moltke-Straße (Westseite)',
+             'Schwachhauser Ring',
+             'Wachmannstraße auswärts (Süd)',
+             'Wachmannstraße einwärts (Nord)',
+             'Osterdeich',
+             'Hastedter Brückenstraße',
+
+             'Wilhelm-Kaisen-Brücke',
+             'Langemarckstraße',
+             'Graf-Moltke-Straße',
+             'Wachmannstraße',
+            ]
+
+
+    source = [0,1,2,3,4,5,6,7,8,9,10,11,
+              12,13,14,15
+             ]
+    target = [12,12,13,13,16,14,14,16,15,15,16,16,
+              16,16,16,16
+             ]
+    value = [dataframe_list[0].sum()[0],
+             dataframe_list[1].sum()[0],
+             dataframe_list[2].sum()[0],
+             dataframe_list[3].sum()[0],
+             dataframe_list[4].sum()[0],
+             dataframe_list[5].sum()[0],
+             dataframe_list[6].sum()[0],
+             dataframe_list[7].sum()[0],
+             dataframe_list[8].sum()[0],
+             dataframe_list[9].sum()[0],
+             dataframe_list[10].sum()[0],
+             dataframe_list[11].sum()[0],
+
+             dataframe_list[0].sum()[0] + dataframe_list[1].sum()[0],
+             dataframe_list[2].sum()[0] + dataframe_list[3].sum()[0],
+             dataframe_list[5].sum()[0] + dataframe_list[6].sum()[0],
+             dataframe_list[8].sum()[0] + dataframe_list[9].sum()[0],
+            ]
+
+
+    fig = go.Figure(data=[go.Sankey(
+        node = dict(
+          pad = 10,
+          thickness =20,
+          line = dict(color = "black", width = 0.1),
+          label = label,
+          color = "grey",
+        ),
+        link = dict(
+          source = source, # indices correspond to labels, eg A1, A2, A1, B1, ...
+          target = target,
+          value = value
+      ))])
+
+    fig.update_layout(hovermode = 'x')
+
+    fig.update_layout(height=800)
+
+    return fig
+
 
 
 

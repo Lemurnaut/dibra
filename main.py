@@ -27,13 +27,13 @@ def download(end_date):
     return dataframe
 
 def main():
-    dataframe_source = download(end_date=(dt.date.today() - dt.timedelta(1)))
-    dataframe_list =  preprocess.dataframe_to_list(dataframe_source)
+    dataframe_source = download(end_date=(dt.date.today() - dt.timedelta(1))) # download data from VMZ
+    dataframe_list_source = preprocess.dataframe_to_list(dataframe_source) # make a list of orig df
 
-    startdate, enddate = st_elements.sidebar_date()
-    starttime, endtime = st_elements.sidebar_time()
+    startdate, enddate = st_elements.sidebar_date() # get start,end date from widget
+    starttime, endtime = st_elements.sidebar_time() # get start, end time from widget
 
-    selected_dataframes = st_elements.sidebar_station_select(dataframe_list)
+    selected_dataframes = st_elements.sidebar_station_select(dataframe_list_source)
     selected_dataframes = [(dataframe.loc[startdate : enddate].between_time(starttime, endtime)) for dataframe in selected_dataframes]
 
     graph_type = st_elements.sidebar_graph_select()
@@ -54,6 +54,12 @@ def main():
         st_graphs.SelectGraph.moving_av(selected_dataframes)
     elif graph_type == 'Radverkehr und Wetter':
         st_graphs.SelectGraph.wetter(selected_dataframes)
+    elif graph_type == 'Sankey-Diagramm':
+        sankey_source = preprocess.dataframe_to_list(dataframe_source)
+        sankey_dataframes = [(dataframe.loc[startdate : enddate].between_time(starttime, endtime)) for dataframe in sankey_source]
+        st_graphs.SelectGraph.sankey(sankey_dataframes)
+
+
 
 
 

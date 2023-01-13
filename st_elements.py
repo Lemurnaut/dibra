@@ -8,7 +8,7 @@ import streamlit as st
 def sidebar_date():
     st.sidebar.write('Datum eingrenzen')
 
-    startdate = st.sidebar.date_input('vom', value=datetime.date(2012, 1, 1))
+    startdate = st.sidebar.date_input('vom', value=datetime.date(2020, 1, 1))
     enddate = st.sidebar.date_input('bis', value=(datetime.date.today() - datetime.timedelta(1)))
 
     return startdate, enddate
@@ -92,7 +92,8 @@ def sidebar_graph_select():
                                                         'gleitender Mittelwert',
                                                         'Saison-Trend-Zerlegung',
                                                         'Oberflächendiagramm',
-                                                        'Radverkehr und Wetter'
+                                                        'Radverkehr und Wetter',
+                                                        'Sankey-Diagramm',
                                                         ])
     return selected_graph
 

@@ -1,6 +1,9 @@
 class method_info(object):
     def __init__(self):
         self.stl = stl
+        self.wetter = wetter
+        self.cumsum = cumsum
+        self.sankey = sankey
 
     stl = 'Das Radverkehrsaufkommen ist saisonal unterschiedlich ausgeprägt. ' \
           'Es schwankt im tages-, wochen- und Jahresverlauf. Mit der verwendeten Methode ist es möglich den Trend und' \
@@ -17,4 +20,7 @@ class method_info(object):
 
     cumsum = 'Mehr zur Berechnung und Darstellung der kumulativen Summe bei [statologie.de](https://' \
              'statologie.de/kumulative-summe-r/).'
+
+
+    sankey = 'Hinweis: Die Auswahl von Radzählstationen hat keinen Einfluss auf die Darstellung.'
 

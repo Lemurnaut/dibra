@@ -18,8 +18,16 @@ class get_values(object):
         self.idxmax_date = dataframe.idxmax()[0].strftime('%d-%m-%Y')
         self.idxmax_time = dataframe.idxmax()[0].strftime('%H:%M')
 
-        self.stats = dataframe.describe()
+        self.stats = self.stats(dataframe)
 
+    def stats(self, dataframe):
+        col = dataframe.columns[0]
+        vals = dataframe.describe().values
+        index = ['Anzahl der Messwerte', 'Mittelwert', 'Standardabweichung', 'Minimum', '25% Perzentil',
+                 '50% Perzentil', '75% Perzentil', 'Maximum']
+        stats = pandas.DataFrame(index=index)
+        stats[col] = vals
+        return stats
 
 
 class SelectGraph():
@@ -36,7 +44,7 @@ class SelectGraph():
         components.html(src, height=600, scrolling=False)
 
         st.write(
-            'Das inoffizielle Radstationen Analysetool (DIBRA) wurde entwickelt, um interessierten Benutzer*innen einen tieferen Einblick in die Daten der Bremer Radzählstationen (https://vmz.bremen.de/radzaehlstationen/) zu bieten. Dafür stehen verschiedene Diagrammtypen als Werkzeuge zu Verfügung. Darüber hinaus werden die Daten der Radzählstationen Daten des Deutschen Wetterdienstes (www.dwd.de) verknüpft.')
+            'Das inoffizielle Radstationen Analysetool wurde entwickelt, um interessierten Benutzer*innen einen tieferen Einblick in die Daten der Bremer Radzählstationen (https://vmz.bremen.de/radzaehlstationen/) zu geben. Hierfür stehen verschiedene Diagrammtypen als Werkzeuge zu Verfügung. Darüber hinaus werden die Daten der Radzählstationen Daten des Deutschen Wetterdienstes (www.dwd.de) verknüpft.')
         st.write(
             'An der linken Bildschirmleiste befindet sich das Optionsmenü. Hier können die Grundeinstellungen zu den Radzählstationen, dem Zeitraum und des Diagrammtyps vorgenommen werden. Je nach gewähltem Diagrammtyp stehen weitere Optionen zu Verfügung.')
 
@@ -90,8 +98,12 @@ class SelectGraph():
 
             st.line_chart(dataframe)
 
-            st.write('Statistische Grundwerte')
-            st.dataframe(data=x.stats, use_container_width=True)
+            with st.expander('Statistische Grundwerte'):
+                st.write('Statistische Grundwerte')
+                st.dataframe(data=x.stats, use_container_width=True)
+
+            with st.expander('Daten'):
+                st.dataframe(dataframe.style.highlight_max(axis=0))
 
     def cumsum(dataframe_list):
         st.header('Kumulierte Summen')
@@ -216,6 +228,14 @@ class SelectGraph():
 
             st.write('Quelle Wetterdaten: dwd.de')
 
+    def sankey(dataframe_list):
+        st.header('Zusammensetzung Radverkehrsaufkommen')
+        st.write('Zeigt die Verteilung des Radverkehrsaufkommens nach Radzählstation an.')
+        with st.expander('Mehr Informationen'):
+            st.write(st_infotext.method_info.sankey)
+
+        fig = plot.sankey(dataframe_list)
+        st.plotly_chart(fig, theme="streamlit", use_container_width=True)
 
 
 

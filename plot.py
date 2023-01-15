@@ -244,7 +244,8 @@ def linechart(dataframe):
     fig = go.Figure()
 
     fig.add_trace(
-        go.Scatter(x=list(dataframe.index), y=list(dataframe.iloc[:, 0])))
+        go.Scatter(x=list(dataframe.index), y=list(dataframe.iloc[:, 0])),
+    )
 
     fig.update_layout(
         title_text=dataframe.columns[0]
@@ -255,30 +256,30 @@ def linechart(dataframe):
             rangeselector=dict(
                 buttons=list([
                         dict(count=1,
-                             label="1m",
+                             label="1 Monat",
                              step="month",
                              stepmode="backward"),
                         dict(count=6,
-                             label="6m",
+                             label="6 Monate",
                              step="month",
                              stepmode="backward"),
                         dict(count=1,
-                             label="YTD",
+                             label="aktuelles Jahr",
                              step="year",
                              stepmode="todate"),
                         dict(count=1,
-                             label="1y",
+                             label="1 Jahr",
                              step="year",
                              stepmode="backward"),
-                        dict(step="all")
+                        dict(step="all",
+                             label='Alles')
                     ])
                 ),
                 rangeslider=dict(
                     visible=True
                 ),
                 type="date"
-            ),
-            template='none'
+            )
         )
 
     fig.add_annotation(x=dataframe.idxmax()[0].strftime('%Y-%m-%d %H:%M:%S'), y=dataframe.max()[0],
@@ -288,47 +289,72 @@ def linechart(dataframe):
 
     fig.update_layout(legend_title_text='')
     fig.update_layout(xaxis_title='Zeit', yaxis_title='Radverkehrsaufkommen')
-
-    fig.update_layout(template='none')
+    fig.update_layout(height=500)
 
     return fig
+
+
+from statsmodels.tsa.seasonal import STL
 
 
 def stl(dataframe, resample_option, robust_option):
     if robust_option == 'robust':
         robust_option = True
-    if robust_option == 'non robust':
+    elif robust_option == 'non robust':
         robust_option = False
 
     if resample_option == 'täglich/Summe':
         res_robust = STL(dataframe.iloc[:, 0].resample('D').sum(), robust=robust_option).fit()
         res_non_robust = STL(dataframe.iloc[:, 0].resample('D').sum(), robust=robust_option).fit()
 
-    if resample_option == 'täglich/Mittelwert':
+    elif resample_option == 'täglich/Mittelwert':
         res_robust = STL(dataframe.iloc[:, 0].resample('D').mean(), robust=robust_option).fit()
         res_non_robust = STL(dataframe.iloc[:, 0].resample('D').mean(), robust=robust_option).fit()
 
-    if resample_option == 'monatlich/Summe':
+    elif resample_option == 'monatlich/Summe':
         res_robust = STL(dataframe.iloc[:, 0].resample('M').sum(), robust=robust_option).fit()
         res_non_robust = STL(dataframe.iloc[:, 0].resample('M').sum(), robust=robust_option).fit()
 
-    if resample_option == 'monatlich/Mittelwert':
+    elif resample_option == 'monatlich/Mittelwert':
         res_robust = STL(dataframe.iloc[:, 0].resample('M').mean(), robust=robust_option).fit()
         res_non_robust = STL(dataframe.iloc[:, 0].resample('M').mean(), robust=robust_option).fit()
 
     if robust_option == True:
-        return res_robust.trend, res_robust.seasonal, res_robust.resid
-    if robust_option == False:
-        return res_non_robust.trend, res_non_robust.seasonal, res_non_robust.resid
+        dataframe_to_plot = res_robust
+
+    elif robust_option == False:
+        dataframe_to_plot = res_non_robust
+
+    trend = px.line(dataframe_to_plot.trend, hover_data={'variable': False})
+    trend.update_layout(legend_title_text='')
+    trend.update_layout(xaxis_title='Zeit', yaxis_title='Wert')
+    trend.update_traces(hovertemplate='Zeit: %{x}<br>' +
+                                      'Wert: %{y}<br>'
+                        )
+    trend.update_layout(showlegend=False)
+
+    seasonal = px.line(dataframe_to_plot.seasonal, hover_data={'variable': False})
+
+    seasonal.update_layout(legend_title_text='')
+    seasonal.update_layout(xaxis_title='Zeit', yaxis_title='Wert')
+    seasonal.update_traces(hovertemplate='Zeit: %{x}<br>' +
+                                         'Wert: %{y}<br>'
+                           )
+    seasonal.update_layout(showlegend=False)
+
+    resid = px.line(dataframe_to_plot.resid, hover_data={'variable': False})
+    resid.update_layout(legend_title_text='')
+    resid.update_layout(xaxis_title='Zeit', yaxis_title='Wert')
+
+    resid.update_traces(hovertemplate='Zeit: %{x}<br>' +
+                                      'Wert: %{y}<br>'
+                        )
+    resid.update_layout(showlegend=False)
+
+    return trend, seasonal, resid, dataframe_to_plot
 
 
-def radverkehr_niederschlag(dataframe, resample_option):
-    if resample_option == 'D':
-        dataframe = dataframe.resample('D').agg({dataframe.columns.values[0]: 'sum', dataframe.columns.values[1]: 'sum',
-                                                 dataframe.columns.values[2]: 'mean'})
-    else:
-        pass
-
+def radverkehr_niederschlag(dataframe):
     fig = px.scatter_3d(dataframe, x=dataframe.index, z=str(dataframe.columns.values[1]), color='Niederschlag',
                         y=str(dataframe.columns.values[0]),
                         color_continuous_scale=px.colors.sequential.Jet, height=800
@@ -341,13 +367,7 @@ def radverkehr_niederschlag(dataframe, resample_option):
     return fig
 
 
-def radverkehr_temperatur(dataframe, resample_option):
-    if resample_option == 'D':
-        dataframe = dataframe.resample('D').agg({dataframe.columns.values[0]: 'sum', dataframe.columns.values[1]: 'sum',
-                                                 dataframe.columns.values[2]: 'mean'}).round()
-    else:
-        pass
-
+def radverkehr_temperatur(dataframe):
     fig = px.scatter_3d(dataframe, x=dataframe.index, z=str(dataframe.columns.values[2]), color='Temperatur',
                         y=str(dataframe.columns.values[0]),
                         color_continuous_scale=px.colors.sequential.Jet, height=800
@@ -358,6 +378,7 @@ def radverkehr_temperatur(dataframe, resample_option):
     fig.update_traces(hoverinfo='all')
 
     return fig
+
 
 def sankey(dataframe_list):
     tmp_frame = reduce(lambda a, b: a.add(b, fill_value=0), dataframe_list)

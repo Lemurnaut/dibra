@@ -1,5 +1,6 @@
 from functools import reduce
 import pandas
+import streamlit
 from scipy.stats import zscore
 import datetime as dt
 from wetterdienst.provider.dwd.observation import DwdObservationRequest, DwdObservationDataset, DwdObservationPeriod, DwdObservationResolution
@@ -37,9 +38,9 @@ def download_data(end_date):
     dataframe = pandas.read_csv(URL, header=0, sep=';')
     dataframe = dataframe.rename(columns={dataframe.columns[0]: "Datetime"})
 
-    # fix to avoid streamlit timezone/ambiguous errors
     dataframe['Datetime'] = pandas.DatetimeIndex(dataframe.Datetime)
-    dataframe['Datetime'] = dataframe['Datetime'].dt.tz_localize('UTC')
+    # fix to avoid streamlit timezone/ambiguous errors
+    #dataframe['Datetime'] = dataframe['Datetime'].dt.tz_localize('UTC')
 
     dataframe.set_index(dataframe.Datetime, inplace=True)
     dataframe = dataframe.drop(columns={dataframe.columns[0]})
@@ -119,7 +120,6 @@ def combine_stations_sides(dataframe_list):
                              dataframe_list[11]]
     return dataframe_list_simple
 
-
 def get_weather(start_date: str, end_date: str, station_id: int):
     '''
     for wetterdienst==0.42.0
@@ -154,6 +154,7 @@ def get_weather(start_date: str, end_date: str, station_id: int):
     temperatur = temperatur.rename(columns={'value': 'Temperatur'})
     temperatur = temperatur.drop(columns={'station_id', 'dataset', 'parameter', 'date', 'quality'})
 
-    wetter = pandas.merge(niederschlag, temperatur, left_index=True, right_index=True, how='outer')
+    weather = pandas.merge(niederschlag, temperatur, left_index=True, right_index=True, how='outer')
+    weather.index = weather.index.tz_localize(tz=None)
 
-    return wetter
+    return weather

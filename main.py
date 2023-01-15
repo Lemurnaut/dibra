@@ -6,7 +6,7 @@ import datetime as dt
 
 version = '0.0.9_alpha'
 
-# setup streamlit layout
+# setup streamlit  menu and layout
 menu_items = {
     'About': '''
     ## RaStA 
@@ -21,22 +21,22 @@ st.set_page_config(layout="wide", menu_items=menu_items)
 col1, col2 = st.columns(2)
 
 
-@st.cache
+@st.experimental_memo
 def download(end_date):
     dataframe = preprocess.download_data(end_date)
     return dataframe
 
 def main():
     dataframe_source = download(end_date=(dt.date.today() - dt.timedelta(1))) # download data from VMZ
-    dataframe_list_source = preprocess.dataframe_to_list(dataframe_source) # make a list of orig df
+    dataframe_list_source = preprocess.dataframe_to_list(dataframe_source) # make a list from orig dfs
 
     startdate, enddate = st_elements.sidebar_date() # get start,end date from widget
     starttime, endtime = st_elements.sidebar_time() # get start, end time from widget
 
-    selected_dataframes = st_elements.sidebar_station_select(dataframe_list_source)
-    selected_dataframes = [(dataframe.loc[startdate : enddate].between_time(starttime, endtime)) for dataframe in selected_dataframes]
+    selected_dataframes = st_elements.sidebar_station_select(dataframe_list_source) # get user input from widget
+    selected_dataframes = [(dataframe.loc[startdate : enddate].between_time(starttime, endtime)) for dataframe in selected_dataframes] # get user input
 
-    graph_type = st_elements.sidebar_graph_select()
+    graph_type = st_elements.sidebar_graph_select() # get user input graph
 
     if graph_type == 'Info':
         st_graphs.SelectGraph.info()

@@ -1,5 +1,6 @@
 import streamlit as st
 import streamlit.components.v1 as components
+from functools import reduce
 import pandas
 import plot
 import preprocess
@@ -48,33 +49,11 @@ class SelectGraph():
         st.write(
             'An der linken Bildschirmleiste befindet sich das Optionsmenü. Hier können die Grundeinstellungen zu den Radzählstationen, dem Zeitraum und des Diagrammtyps vorgenommen werden. Je nach gewähltem Diagrammtyp stehen weitere Optionen zu Verfügung.')
 
+        with st.expander('Mehr Informationen'):
+            st.markdown(st_infotext.common.data_info)
+
         with st.expander('Stationstabelle / Beginn der Messungen'):
-            Stationstabelle = {'Stationsname': ['Wilhelm-Kaisen-Brücke (West)',
-                                                'Wilhelm-Kaisen-Brücke (Ost)',
-                                                'Langemarckstraße (Ostseite)',
-                                                'Langemarckstraße (Westseite)',
-                                                'Radweg Kleine Weser',
-                                                'Graf-Moltke-Straße (Ostseite)',
-                                                'Graf-Moltke-Straße (Westseite)',
-                                                'Hastedter Brückenstraße',
-                                                'Schwachhauser Ring',
-                                                'Wachmannstraße auswärts (Süd)',
-                                                'Wachmannstraße einwärts (Nord)',
-                                                'Osterdeich',
-                                                ],
-                    'Erster Messwert > 0 am' : ['2012-01-01 00:00:00',
-                                                '2012-01-01 00:00:00',
-                                                '2012-03-14 11:00:00',
-                                                '2012-04-23 13:00:00',
-                                                '2012-04-18 11:00:00',
-                                                '2012-04-16 13:00:00',
-                                                '2012-04-16 11:00:00',
-                                                '2012-04-25 12:00:00',
-                                                '2012-03-14 05:00:00',
-                                                '2012-04-24 15:00:00',
-                                                '2012-04-24 12:00:00',
-                                                '2012-04-17 11:00:00',
-                                                ]}
+            Stationstabelle = st_infotext.common.table_stations
             stationstabelle = pandas.DataFrame(Stationstabelle)
             stationstabelle.set_index(stationstabelle.Stationsname, inplace=True)
             stationstabelle = stationstabelle.drop(columns={stationstabelle.columns[0]})
@@ -84,7 +63,7 @@ class SelectGraph():
         st.write('Quelle Radverkehrsdaten: [VerkehrsManagementZentrale Bremen](https://vmz.bremen.de/rad/radzaehlstationen-abfrage)')
         st.write('Quelle Wetterdaten: [Deutscher Wetterdienst](https://www.dwd.de)')
 
-        st.write('©2022 www.moin-stefko.de / mail: hallo@moin-stefko.de')
+        st.write('©2022 www.moin-stefko.de / hallo@moin-stefko.de')
 
 
     def overview(dataframe_list):
@@ -96,7 +75,8 @@ class SelectGraph():
             st.write(f'vom {x.index_date_min} bis {x.index_date_max}, zwischen {x.index_time_min} Uhr und {x.index_time_max} Uhr.')
             st.write(f'Maximalwert: {x.max}, am {x.idxmax_date} um {x.idxmax_time} Uhr')
 
-            st.line_chart(dataframe)
+            fig = plot.linechart(dataframe)
+            st.plotly_chart(fig, theme="streamlit", use_container_width=True, config={'displaylogo': False})
 
             with st.expander('Statistische Grundwerte'):
                 st.write('Statistische Grundwerte')
@@ -108,20 +88,24 @@ class SelectGraph():
     def cumsum(dataframe_list):
         st.header('Kumulierte Summen')
         st.write('Zeigt das aufsummierte Radverkehrsaufkommen an.')
+
+        x = get_values(dataframe_list[0]) # get values for index info from first df in list
+        st.write(f'vom {x.index_date_min} bis {x.index_date_max}, zwischen {x.index_time_min} Uhr und {x.index_time_max} Uhr.')
+
+        dataframe_reduced = reduce(lambda a, b: a.add(b, fill_value=0), dataframe_list)
+        dataframe_reduced['Gesamt'] = preprocess.sumDataframe(dataframe_list)
+        fig = plot.linechart_cumsum(dataframe_reduced)
+        st.plotly_chart(fig, theme="streamlit", use_container_width=True, config={'displaylogo': False})
+
+        with st.expander('Daten'):
+            st.dataframe(dataframe_reduced)
+
         with st.expander('Mehr Informationen'):
             st.write(st_infotext.method_info.cumsum)
-        for dataframe in dataframe_list:
-            x = get_values(dataframe)
-
-            st.subheader(dataframe.columns[0])
-            st.write(f'{x.index_date_min} bis {x.index_date_max} zwischen {x.index_time_min} Uhr und {x.index_time_max} Uhr')
-
-            fig = plot.linechart_cumsum(dataframe)
-            st.plotly_chart(fig, theme="streamlit", use_container_width=True)
 
     def week_dist(dataframe_list):
         st.header('Radverkehr im Tagesverlauf')
-        st.write('Die Diagramme zeigen das durchschnittliche Radverkehrsaufkommen zur jeweiligen Uhrzeit an den Wochentagen, bzw. Werktagen und Wochenendtagen an.')
+        st.write('Zeigt das durchschnittliche Radverkehrsaufkommen zur jeweiligen Uhrzeit an den Wochentagen, bzw. Werktagen und Wochenendtagen an.')
         for dataframe in dataframe_list:
             x = get_values(dataframe)
 
@@ -130,40 +114,41 @@ class SelectGraph():
 
             st.write('Wochentage')
             fig, dataframe_first_monday, dataframe_last_sunday = plot.weekdays(dataframe)
-            st.plotly_chart(fig, theme="streamlit", use_container_width=True)
+            st.plotly_chart(fig, theme="streamlit", use_container_width=True, config={'displaylogo': False})
 
             st.write('Werktage & Wochenende')
             fig = plot.week_dist(dataframe)
-            st.plotly_chart(fig, theme="streamlit", use_container_width=True)
+            st.plotly_chart(fig, theme="streamlit", use_container_width=True, config={'displaylogo': False})
 
 
     def stl(dataframe_list):
         st.header('Saison-Trend-Zerlegung')
-        st.write('Zerlegt die Zeitreihe in Trend-, Saison- und Restkomponenten unter Verwendung einer lokalen linearen Kernregression.')
-        with st.expander('Mehr Informationen'):
-            st.write(st_infotext.method_info.stl)
+        st.write('Zeigt Trend-, Saison- und Restkomponente der Zeitreihe unter Verwendung einer lokal linearen Kernregression.')
 
         resample_option, robust_option = st_elements.stl_options()
 
         for dataframe in dataframe_list:
-            trend, seasonal, resid = plot.stl(dataframe, resample_option, robust_option)
+            trend, seasonal, resid, data = plot.stl(dataframe, resample_option, robust_option)
 
             x = get_values(dataframe)
 
             st.subheader(dataframe.columns[0])
             st.write(f'vom {x.index_date_min} bis {x.index_date_max}, zwischen {x.index_time_min} Uhr und {x.index_time_max} Uhr.')
 
-            st.line_chart(trend)
+            st.plotly_chart(trend, use_container_width=True, config={'displaylogo': False})
 
             with st.expander('Zeige Saisonkomponente'):
-                st.line_chart(seasonal)
+                st.plotly_chart(seasonal, use_container_width=True, config={'displaylogo': False})
             with st.expander('Zeige Residuen'):
-                st.line_chart(resid)
+                st.plotly_chart(resid, use_container_width=True, config={'displaylogo': False})
             with st.expander('Zeige Daten'):
-                data_to_show = pandas.merge(pandas.merge(trend, seasonal, left_index=True, right_index=True, how='outer'),
-                                        resid, left_index=True, right_index=True, how='outer')
+                data_to_show = pandas.merge(pandas.merge(data.trend, data.seasonal, left_index=True, right_index=True, how='outer'),
+                                        data.resid, left_index=True, right_index=True, how='outer')
                 data_to_show[dataframe.columns[0]] = data_to_show.sum(axis=1).round()
                 st.write(data_to_show)
+
+        with st.expander('Mehr Informationen'):
+            st.write(st_infotext.method_info.stl)
 
     def surface(dataframe_list):
         st.header('Oberflächendiagramm')
@@ -178,10 +163,11 @@ class SelectGraph():
 
             if plot_option == 'Jahr/Monat':
                 fig = plot.surface.year_month(dataframe, calc_option)
-                st.write(fig)
+                st.plotly_chart(fig, use_container_width=True, config={'displaylogo': False})
             if plot_option == 'Wochen/Stunden':
                 fig = plot.surface.week_hour(dataframe, calc_option)
-                st.write(fig)
+                st.plotly_chart(fig, use_container_width=True, config={'displaylogo': False})
+
 
     def moving_av(dataframe_list):
         st.header('Gleitdender Mittelwert')
@@ -195,7 +181,7 @@ class SelectGraph():
             window, periods = st_elements.ma_options(dataframe)
             try:
                 fig = plot.moving_av(dataframe, window, periods)
-                st.plotly_chart(fig, theme="streamlit", use_container_width=True)
+                st.plotly_chart(fig, theme="streamlit", use_container_width=True, config={'displaylogo': False})
             except ValueError:
                 st.warning(f'Fehler! Größe des sich bewegenden Fensters muss kleiner sein als die erforderliche Mindestanzahl von Beobachtungen im Fenster. Du hast {window} als Größe für das fenster und{periods} als Mindestanzahl der Messwerte im Fenster ausgewählt.', icon='⚠️')
 
@@ -203,40 +189,54 @@ class SelectGraph():
         st.header('Radverkehr und Wetter')
         st.write('Zeigt das Radverkehrsaufkommen in Kombination mit den Temperatur- und Niederschlagsdaten des Deutschen' \
              ' Wetterdienst an.')
-        with st.expander('Mehr Informationen'):
-            st.write(st_infotext.method_info.wetter)
+
         for dataframe in dataframe_list:
             x = get_values(dataframe)
 
             st.subheader(dataframe.columns[0])
             st.write(f'vom {x.index_date_min} bis {x.index_date_max}, zwischen {x.index_time_min} Uhr und {x.index_time_max} Uhr.')
 
-            wetter_start = str(dataframe.index.min())
-            wetter_end = str(dataframe.index.max())
+            weather_start = str(dataframe.index.min())
+            weather_end = str(dataframe.index.max())
 
-            wetter = preprocess.get_weather(wetter_start, wetter_end, 691)
+            weather = preprocess.get_weather(weather_start, weather_end, 691)
 
-            bikewetter = pandas.merge(dataframe, wetter, left_index=True, right_index=True, how='outer')
+            bikeweather_hourly = pandas.merge(dataframe, weather, left_index=True, right_index=True, how='outer')
+
+            bikeweather_daily = bikeweather_hourly.resample('D').agg(
+                {bikeweather_hourly.columns.values[0]: 'sum', bikeweather_hourly.columns.values[1]: 'sum',
+                 bikeweather_hourly.columns.values[2]: 'mean'}).round()
+
 
             st.write('Radverkehr und Temperatur')
-            fig = plot.radverkehr_temperatur(bikewetter, 'D')
-            st.plotly_chart(fig, theme="streamlit", use_container_width=True)
+            fig = plot.radverkehr_temperatur(bikeweather_daily)
+            st.plotly_chart(fig, theme="streamlit", use_container_width=True, config={'displaylogo': False})
 
             st.write('Radverkehr und Niederschlag')
-            fig = plot.radverkehr_niederschlag(bikewetter, 'D')
-            st.plotly_chart(fig, theme="streamlit", use_container_width=True)
+            fig = plot.radverkehr_niederschlag(bikeweather_daily)
+            st.plotly_chart(fig, theme="streamlit", use_container_width=True, config={'displaylogo': False})
 
-            st.write('Quelle Wetterdaten: dwd.de')
+            with st.expander('Daten'):
+                st.dataframe(bikeweather_daily.style.highlight_max(axis=0))
+
+        with st.expander('Mehr Informationen'):
+                st.write(st_infotext.method_info.wetter)
+
+        st.write('Quelle Wetterdaten: [dwd.de](https://dwd.de)')
 
     def sankey(dataframe_list):
         st.header('Zusammensetzung Radverkehrsaufkommen')
         st.write('Zeigt den Anteil der Radzählstationen am gemessenen Radverkehrsaufkommen.')
+
+        x = get_values(dataframe_list[0]) # get values for index info from first df in list
+        st.write(f'vom {x.index_date_min} bis {x.index_date_max}, zwischen {x.index_time_min} Uhr und {x.index_time_max} Uhr.')
+
+        fig = plot.sankey(dataframe_list)
+        st.plotly_chart(fig, theme="streamlit", use_container_width=True, config={'displaylogo': False})
+
         with st.expander('Mehr Informationen'):
             st.write(st_infotext.method_info.sankey)
             st.info('Hinweis: Die Auswahl von Radzählstationen hat keinen Einfluss auf die Darstellung.', icon='ℹ️')
-
-        fig = plot.sankey(dataframe_list)
-        st.plotly_chart(fig, theme="streamlit", use_container_width=True)
 
 
 

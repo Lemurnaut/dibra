@@ -1,31 +1,31 @@
 from functools import reduce
 import pandas
-import streamlit
-from scipy.stats import zscore
-import datetime as dt
-from wetterdienst.provider.dwd.observation import DwdObservationRequest, DwdObservationDataset, DwdObservationPeriod, DwdObservationResolution
+
+from wetterdienst.provider.dwd.observation import DwdObservationRequest, DwdObservationDataset, DwdObservationPeriod, \
+    DwdObservationResolution
 from wetterdienst import Settings
 
 
 def download_data(end_date):
     station_id = ['100044202',
-                 '100000575',
-                 '100002926',
-                 '100002927',
-                 '100002930',
-                 '100002931',
-                 '100002932',
-                 '100002933',
-                 '100002934',
-                 '100002935',
-                 '100047799',
-                 '100047805',
-                 ]
+                  '100000575',
+                  '100002926',
+                  '100002927',
+                  '100002930',
+                  '100002931',
+                  '100002932',
+                  '100002933',
+                  '100002934',
+                  '100002935',
+                  '100047799',
+                  '100047805',
+                  ]
 
     data_startdate = '2012-01-01'
     data_enddate = end_date
 
-    source = f'https://vmz.bremen.de/radzaehler-api/?action=Values&apiFormat=csv&resolution=hourly&startDate={data_startdate}&endDate={data_enddate}'
+    source = f'https://vmz.bremen.de/radzaehler-api/?action=Values&apiFormat=csv&resolution=hourly&startDate=' \
+             f'{data_startdate}&endDate={data_enddate}'
 
     IDs = []
     for x in station_id:
@@ -36,11 +36,12 @@ def download_data(end_date):
     URL = source + IDs
 
     dataframe = pandas.read_csv(URL, header=0, sep=';')
+
     dataframe = dataframe.rename(columns={dataframe.columns[0]: "Datetime"})
 
     dataframe['Datetime'] = pandas.DatetimeIndex(dataframe.Datetime)
     # fix to avoid streamlit timezone/ambiguous errors
-    #dataframe['Datetime'] = dataframe['Datetime'].dt.tz_localize('UTC')
+    # dataframe['Datetime'] = dataframe['Datetime'].dt.tz_localize('UTC')
 
     dataframe.set_index(dataframe.Datetime, inplace=True)
     dataframe = dataframe.drop(columns={dataframe.columns[0]})
@@ -49,12 +50,13 @@ def download_data(end_date):
 
     return dataframe
 
+
 def dataframe_to_list(dataframe):
-    '''
+    """
     takes pd.Dataframe creates list of dataframes from columns
     :param dataframe: pd.Dataframe
     :return: list
-    '''
+    """
     import pandas
 
     column_names = dataframe.columns.tolist()
@@ -70,13 +72,14 @@ def dataframe_to_list(dataframe):
 
     return dataframe_proceed
 
+
 def sumDataframe(dataframe_list):
-    '''
+    """
     takes list of pandas dataframe
     reduce a list of pandas dataframes to one frame
     sum the rows
     returns pandas dataframe
-    '''
+    """
     import pandas as pd
     from functools import reduce
 
@@ -89,26 +92,26 @@ def combine_stations_sides(dataframe_list):
     wkb = reduce(lambda a, b: a.add(b, fill_value=0), [dataframe_list[0], dataframe_list[1]])
     wkb = pandas.DataFrame(wkb.sum(axis=1))
     wkb.set_axis(['Wilhelm-Kaisen-Brücke'], axis=1, inplace=True)
-    wkb = pandas.merge(pandas.merge(wkb, dataframe_list[0], left_index=True, right_index=True, how='outer'), dataframe_list[1],
-                                 left_index=True, right_index=True, how='outer')
+    wkb = pandas.merge(pandas.merge(wkb, dataframe_list[0], left_index=True, right_index=True, how='outer'),
+                       dataframe_list[1], left_index=True, right_index=True, how='outer')
 
     lngm = reduce(lambda a, b: a.add(b, fill_value=0), [dataframe_list[2], dataframe_list[3]])
     lngm = pandas.DataFrame(lngm.sum(axis=1))
     lngm.set_axis(['Langemarckstraße'], axis=1, inplace=True)
-    lngm = pandas.merge(pandas.merge(lngm, dataframe_list[2], left_index=True, right_index=True, how='outer'), dataframe_list[3],
-                                 left_index=True, right_index=True, how='outer')
+    lngm = pandas.merge(pandas.merge(lngm, dataframe_list[2], left_index=True, right_index=True, how='outer'),
+                        dataframe_list[3], left_index=True, right_index=True, how='outer')
 
     grfm = reduce(lambda a, b: a.add(b, fill_value=0), [dataframe_list[5], dataframe_list[6]])
     grfm = pandas.DataFrame(grfm.sum(axis=1))
     grfm.set_axis(['Graf-Moltke-Straße'], axis=1, inplace=True)
-    grfm = pandas.merge(pandas.merge(grfm, dataframe_list[5], left_index=True, right_index=True, how='outer'), dataframe_list[6],
-                                 left_index=True, right_index=True, how='outer')
+    grfm = pandas.merge(pandas.merge(grfm, dataframe_list[5], left_index=True, right_index=True, how='outer'),
+                        dataframe_list[6], left_index=True, right_index=True, how='outer')
 
     wms = reduce(lambda a, b: a.add(b, fill_value=0), [dataframe_list[8], dataframe_list[9]])
     wms = pandas.DataFrame(wms.sum(axis=1))
     wms.set_axis(['Wachmannstraße'], axis=1, inplace=True)
-    wms = pandas.merge(pandas.merge(wms, dataframe_list[8], left_index=True, right_index=True, how='outer'), dataframe_list[9],
-                                 left_index=True, right_index=True, how='outer')
+    wms = pandas.merge(pandas.merge(wms, dataframe_list[8], left_index=True, right_index=True, how='outer'),
+                       dataframe_list[9], left_index=True, right_index=True, how='outer')
 
     dataframe_list_simple = [wkb,
                              lngm,
@@ -120,10 +123,11 @@ def combine_stations_sides(dataframe_list):
                              dataframe_list[11]]
     return dataframe_list_simple
 
+
 def get_weather(start_date: str, end_date: str, station_id: int):
-    '''
+    """
     for wetterdienst==0.42.0
-    '''
+    """
 
     Settings.tidy = True
     Settings.humanize = True
@@ -155,6 +159,6 @@ def get_weather(start_date: str, end_date: str, station_id: int):
     temperatur = temperatur.drop(columns={'station_id', 'dataset', 'parameter', 'date', 'quality'})
 
     weather = pandas.merge(niederschlag, temperatur, left_index=True, right_index=True, how='outer')
-    weather.index = weather.index.tz_localize(tz=None)
+    weather.index = weather.index.tz_localize(tz=None)  # delete timezone from df index
 
     return weather

@@ -1,21 +1,22 @@
+import datetime as dt
 import streamlit as st
 import st_elements
 import st_graphs
 import preprocess
-import datetime as dt
+
 
 version = '0.0.9_alpha'
 
 # setup streamlit  menu and layout
 menu_items = {
     'About': '''
-    ## 
-    Bremer Radzählstationen Analysetool
+    ## Bremer Radzählstationen Analysetool
 
     made by stefko
 
     www.moin-stefko.de
-    '''
+    ''',
+    'Get help': None
     }
 st.set_page_config(layout="wide",
                    menu_items=menu_items

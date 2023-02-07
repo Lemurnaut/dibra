@@ -29,6 +29,7 @@ class common(object):
     def __init__(self):
         self.data_info = data_info
         self.table_stations = table_stations
+        self.map_iframe = map_iframe
 
     data_info = 'Die Rohdaten der Verkehrsmangagementzentrale werden für die Weiterverarbeitung in dieser App nur' \
                 ' minimal und wenn notwendig vorbearbeitet:' \
@@ -64,3 +65,17 @@ class common(object):
                                                   '2012-04-17 11:00:00',
                                                   ]}
 
+    map_iframe = '<iframe width="100%" height="600px" frameborder="0" allowfullscreen src="//umap.openstreetmap.fr' \
+          '/de/map/' \
+          'unbenannte-karte_570969?scaleControl=false&miniMap=false&scrollWheelZoom=false&zoomControl=' \
+          'true&allowEdit=false&moreControl=true&searchControl=null&tilelayersControl=null&embedControl=' \
+          'null&datalayersControl=true&onLoadPanel=undefined&captionBar=false"></iframe>'
+
+    intro_1 = 'Das inoffizielle Radstationen Analysetool wurde entwickelt, um interessierten Benutzer*innen einen ' \
+             'tieferen Einblick in die Daten der [Bremer Radzählstationen](https://vmz.bremen.de/radzaehlstationen/) ' \
+             'zu geben. Hierfür stehen verschiedene Diagrammtypen als Werkzeuge zu Verfügung. Darüber hinaus werden ' \
+             'die Daten der Radzählstationen Daten des [Deutschen Wetterdienstes](www.dwd.de) verknüpft.'
+
+    intro_2 = 'An der linken Bildschirmleiste befindet sich das Optionsmenü. Hier können die Grundeinstellungen zu den ' \
+              'Radzählstationen, dem Zeitraum und des Diagrammtyps vorgenommen werden. Je nach gewähltem Diagrammtyp ' \
+              'stehen weitere Optionen zu Verfügung.'

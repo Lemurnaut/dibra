@@ -6,19 +6,20 @@ from statsmodels.tsa.seasonal import STL
 import datetime as dt
 from functools import reduce
 
+
 class surface():
     def year_month(dataframe, calc_option):
-
-        dataframe = dataframe.groupby([dataframe.index.year, dataframe.index.month]).agg(calc_option)
-        dataframe = dataframe.unstack()
+        dataframe_to_plot = dataframe.groupby([dataframe.index.year, dataframe.index.month]).agg(calc_option)
+        dataframe_to_plot = dataframe_to_plot.unstack()
 
         fig = go.Figure(data=[
-            go.Surface(z=dataframe.values, hovertemplate='Jahr: %{y}<br>Monat: %{x}<br>Anzahl: %{z}<extra></extra>')])
+            go.Surface(z=dataframe_to_plot.values,
+                       hovertemplate='Jahr: %{y}<br>Monat: %{x}<br>Anzahl: %{z}<extra></extra>')])
         fig.update_layout(scene=dict(
             yaxis=dict(
                 title='Jahr',
-                ticktext=dataframe.index.unique().astype(str).tolist(),
-                tickvals=list(range(len(dataframe.index.unique()))),
+                ticktext=dataframe_to_plot.index.unique().astype(str).tolist(),
+                tickvals=list(range(len(dataframe_to_plot.index.unique()))),
                 tickmode='array'
             ),
             xaxis=dict(
@@ -40,23 +41,23 @@ class surface():
     def month_week(dataframe, calc_option):
         import plotly.graph_objects as go
 
-        dataframe = dataframe.groupby([dataframe.index.isocalendar().week, dataframe.index.month]).sum()
-        dataframe = dataframe.unstack()
+        dataframe_to_plot = dataframe.groupby([dataframe.index.isocalendar().week, dataframe.index.month]).sum()
+        dataframe_to_plot = dataframe_to_plot.unstack()
 
-        fig = go.Figure(data=[go.Surface(z=dataframe.values,
+        fig = go.Figure(data=[go.Surface(z=dataframe_to_plot.values,
                                          hovertemplate='Monat: %{x}<br>Stunde: %{y} Uhr<br>Anzahl: %{z}<extra></extra>')])
         fig.update_layout(scene=dict(
             xaxis=dict(
                 title='Monat',
                 ticktext=['JAN', 'FEB', 'MÄR', 'APR', 'MAI', 'JUN', 'JUL', 'AUG', 'SEP', 'OKT', 'NOV', 'DEZ'],
-                tickvals=list(range(len(dataframe.columns))),
+                tickvals=list(range(len(dataframe_to_plot.columns))),
                 tickmode='array'
             ),
 
             yaxis=dict(
                 title='Stunde',
-                ticktext=dataframe.index.unique().astype(str).tolist(),
-                tickvals=list(range(len(dataframe.index.unique()))),
+                ticktext=dataframe_to_plot.index.unique().astype(str).tolist(),
+                tickvals=list(range(len(dataframe_to_plot.index.unique()))),
                 tickmode='array'
             ),
             zaxis=dict(
@@ -72,24 +73,25 @@ class surface():
     def week_hour(dataframe, calc_option):
         import plotly.graph_objects as go
 
-        dataframe = dataframe.groupby([dataframe.index.hour, dataframe.index.isocalendar().week]).sum()
-        dataframe = dataframe.unstack()
+        dataframe_to_plot = dataframe.groupby([dataframe.index.hour, dataframe.index.isocalendar().week]).sum()
+        dataframe_to_plot = dataframe_to_plot.unstack()
 
-        fig = go.Figure(data=[go.Surface(z=dataframe.values,
+        fig = go.Figure(data=[go.Surface(z=dataframe_to_plot.values,
                                          hovertemplate='Woche: %{x}<br>Stunde: %{y} Uhr<br>Anzahl: %{z}<extra></extra>')])
         fig.update_layout(scene=dict(
             xaxis=dict(
                 title='Woche',
-                tickvals=list(range(len(dataframe.columns))),
+                tickvals=list(range(len(dataframe_to_plot.columns))),
                 tickmode='array'
             ),
 
             yaxis=dict(
                 title='Stunde',
-                ticktext=dataframe.index.unique().astype(str).tolist(),
-                tickvals=list(range(len(dataframe.index.unique()))),
+                ticktext=dataframe_to_plot.index.unique().astype(str).tolist(),
+                tickvals=list(range(len(dataframe_to_plot.index.unique()))),
                 tickmode='array'
             ),
+
             zaxis=dict(
                 title='Anzahl'
             ),
@@ -99,6 +101,7 @@ class surface():
             margin=dict(r=10, l=10, b=10, t=10
                         ))
         return fig
+
 
 def moving_av(dataframe, window, periods):
     ma = dataframe.resample('D').sum().rolling(window=window, center=True, min_periods=periods).mean()
@@ -117,6 +120,7 @@ def moving_av(dataframe, window, periods):
     fig.update_layout(showlegend=False)
     fig.update_layout(xaxis_title='Zeit', yaxis_title='Radverkehrsaufkommen')
     return fig
+
 
 def week_dist(dataframe):
     weekend = np.where(dataframe.index.weekday < 5, 'Weekday', 'Weekend')
@@ -140,6 +144,7 @@ def week_dist(dataframe):
     fig.update_layout(xaxis_title='Zeit', yaxis_title='Durchschnittliches Radverkehrsaufkommen')
 
     return fig
+
 
 def weekdays(dataframe):
     dataframe_startdate = dataframe.index.min()
@@ -217,13 +222,10 @@ def weekdays(dataframe):
 
 
 def linechart_cumsum(dataframe):
-    '''
-    plotly linechart
-
-    takes list of dataframes
+    """
 
 
-    '''
+    """
     fig = px.line(dataframe.cumsum(), hover_data={'variable': False})
 
     fig.update_layout(legend_title_text='')
@@ -239,8 +241,8 @@ def linechart_cumsum(dataframe):
 
 
 def linechart(dataframe):
-    '''
-    '''
+    """
+    """
     fig = go.Figure()
 
     fig.add_trace(
@@ -248,56 +250,52 @@ def linechart(dataframe):
     )
 
     fig.update_layout(
-        title_text=dataframe.columns[0]
-    )
-
-    fig.update_layout(
         xaxis=dict(
             rangeselector=dict(
                 buttons=list([
-                        dict(count=1,
-                             label="1 Monat",
-                             step="month",
-                             stepmode="backward"),
-                        dict(count=6,
-                             label="6 Monate",
-                             step="month",
-                             stepmode="backward"),
-                        dict(count=1,
-                             label="aktuelles Jahr",
-                             step="year",
-                             stepmode="todate"),
-                        dict(count=1,
-                             label="1 Jahr",
-                             step="year",
-                             stepmode="backward"),
-                        dict(step="all",
-                             label='Alles')
-                    ])
-                ),
-                rangeslider=dict(
-                    visible=True
-                ),
-                type="date"
-            )
+                    dict(count=1,
+                         label="1 Monat",
+                         step="month",
+                         stepmode="backward"),
+                    dict(count=6,
+                         label="6 Monate",
+                         step="month",
+                         stepmode="backward"),
+                    dict(count=1,
+                         label="aktuelles Jahr",
+                         step="year",
+                         stepmode="todate"),
+                    dict(count=1,
+                         label="1 Jahr",
+                         step="year",
+                         stepmode="backward"),
+                    dict(step="all",
+                         label='Alles')
+                ])
+            ),
+            rangeslider=dict(
+                visible=True
+            ),
+            type="date"
         )
+    )
 
     fig.add_annotation(x=dataframe.idxmax()[0].strftime('%Y-%m-%d %H:%M:%S'), y=dataframe.max()[0],
-                           text='Maximum',
-                           showarrow=True,
-                           arrowhead=1)
+                       text='Maximum',
+                       showarrow=True,
+                       arrowhead=1)
 
     fig.update_layout(legend_title_text='')
     fig.update_layout(xaxis_title='Zeit', yaxis_title='Radverkehrsaufkommen')
-    fig.update_layout(height=500)
+    fig.update_layout(height=580)
 
     return fig
 
 
-from statsmodels.tsa.seasonal import STL
-
-
 def stl(dataframe, resample_option, robust_option):
+    res_robust = None
+    res_non_robust = None
+
     if robust_option == 'robust':
         robust_option = True
     elif robust_option == 'non robust':
@@ -363,6 +361,7 @@ def radverkehr_niederschlag(dataframe):
     fig.update_traces(hovertemplate='Datum: %{x} <br>' + 'Anzahl: %{y} <br>' + 'Niederschlag: %{z}')
 
     fig.update_traces(hoverinfo='all')
+    fig.update_layout(width=1600, height=850, margin=dict(r=10, l=10, b=10, t=10))
 
     return fig
 
@@ -376,6 +375,7 @@ def radverkehr_temperatur(dataframe):
     fig.update_traces(hovertemplate='Datum: %{x} <br>' + 'Anzahl: %{y} <br>' + 'Temperatur: %{z}')
 
     fig.update_traces(hoverinfo='all')
+    fig.update_layout(width=1600, height=850, margin=dict(r=10, l=10, b=10, t=10))
 
     return fig
 

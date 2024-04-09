@@ -310,7 +310,6 @@ def stl(dataframe, resample_option, robust_option):
         res_non_robust = STL(dataframe.iloc[:, 0].resample('D').mean(), robust=robust_option).fit()
 
     elif resample_option == 'monatlich/Summe':
-        print(dtype(dataframe.iloc[:, 0].resample('M').sum())
         res_robust = STL(dataframe.iloc[:, 0].resample('M').sum(), robust=robust_option).fit()
         res_non_robust = STL(dataframe.iloc[:, 0].resample('M').sum(), robust=robust_option).fit()
 

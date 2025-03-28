@@ -357,6 +357,8 @@ class SelectGraph():
             with  col1:
                 for dataframe in dataframe_list:
 
+                    dataframe = dataframe.loc[startdate_1 : enddate_1].between_time(starttime_1, endtime_1)
+
                     x = GetValues(dataframe)
 
                     st.subheader(dataframe.columns[0])
@@ -364,7 +366,7 @@ class SelectGraph():
                         f'vom {x.index_date_min} bis {x.index_date_max}, '
                         f'zwischen {x.index_time_min} Uhr und {x.index_time_max} Uhr.')
                     st.write(f'Maximalwert: {x.max}, am {x.idxmax_date} um {x.idxmax_time} Uhr')
-                    fig = plot.linechart(dataframe.loc[startdate_1 : enddate_1].between_time(starttime_1, endtime_1))
+                    fig = plot.linechart(dataframe)
                     st.plotly_chart(fig, theme="streamlit", use_container_width=True, config={'displaylogo': False}, key=f'{dataframe.columns[0]}_1')
 
                     with st.expander('Statistische Grundwerte'):
@@ -377,6 +379,8 @@ class SelectGraph():
             with  col2:
                 for dataframe in dataframe_list:
 
+                    dataframe = dataframe.loc[startdate_2 : enddate_2].between_time(starttime_2, endtime_2)
+
                     x = GetValues(dataframe)
 
                     st.subheader(dataframe.columns[0])
@@ -384,7 +388,7 @@ class SelectGraph():
                         f'vom {x.index_date_min} bis {x.index_date_max}, '
                         f'zwischen {x.index_time_min} Uhr und {x.index_time_max} Uhr.')
                     st.write(f'Maximalwert: {x.max}, am {x.idxmax_date} um {x.idxmax_time} Uhr')
-                    fig = plot.linechart(dataframe.loc[startdate_2 : enddate_2].between_time(starttime_2, endtime_2))
+                    fig = plot.linechart(dataframe)
                     st.plotly_chart(fig, theme="streamlit", use_container_width=True, config={'displaylogo': False}, key=f'{dataframe.columns[0]}_2')
 
                     with st.expander('Statistische Grundwerte'):
@@ -398,7 +402,10 @@ class SelectGraph():
         if option == 'Kummulationen':
             with col1:
                 for dataframe in dataframe_list:
-                    x = GetValues(dataframe_list[0])  # get values for index info from first df in list
+
+                    dataframe = dataframe.loc[startdate_1 : enddate_1].between_time(starttime_1, endtime_1)
+
+                    x = GetValues(dataframe)  # get values for index info from first df in list
                     st.subheader(dataframe.columns[0])
                     st.write(
                         f'vom {x.index_date_min} bis {x.index_date_max}, '
@@ -406,7 +413,7 @@ class SelectGraph():
 
                     dataframe_reduced = reduce(lambda a, b: a.add(b, fill_value=0), dataframe_list)
                     dataframe_reduced['Gesamt'] = preprocess.sumDataframe(dataframe_list)
-                    fig = plot.linechart_cumsum(dataframe_reduced.loc[startdate_1 : enddate_1].between_time(starttime_1, endtime_1))
+                    fig = plot.linechart_cumsum(dataframe_reduced)
                     st.plotly_chart(fig, theme="streamlit", use_container_width=True, config={'displaylogo': False}, key=f'{dataframe.columns[0]}_1')
 
                     with st.expander('Daten'):
@@ -417,7 +424,10 @@ class SelectGraph():
 
             with col2:
                 for dataframe in dataframe_list:
-                    x = GetValues(dataframe_list[0])  # get values for index info from first df in list
+
+                    dataframe = dataframe.loc[startdate_2 : enddate_2].between_time(starttime_2, endtime_2)
+
+                    x = GetValues(dataframe)  # get values for index info from first df in list
                     st.subheader(dataframe.columns[0])
                     st.write(
                         f'vom {x.index_date_min} bis {x.index_date_max}, '
@@ -425,7 +435,7 @@ class SelectGraph():
 
                     dataframe_reduced = reduce(lambda a, b: a.add(b, fill_value=0), dataframe_list)
                     dataframe_reduced['Gesamt'] = preprocess.sumDataframe(dataframe_list)
-                    fig = plot.linechart_cumsum(dataframe_reduced.loc[startdate_2 : enddate_2].between_time(starttime_2, endtime_2))
+                    fig = plot.linechart_cumsum(dataframe_reduced)
                     st.plotly_chart(fig, theme="streamlit", use_container_width=True, config={'displaylogo': False}, key=f'{dataframe.columns[0]}_2')
 
                     with st.expander('Daten'):
@@ -437,24 +447,30 @@ class SelectGraph():
         if option == 'Wochentag / Tageszeit':
             with col1:
                 for dataframe in dataframe_list:
+
+                    dataframe = dataframe.loc[startdate_1 : enddate_1].between_time(starttime_1, endtime_1)
+
                     x = GetValues(dataframe)
 
                     st.subheader(dataframe.columns[0])
                     st.write(
                         f'vom {x.index_date_min} bis {x.index_date_max}, '
                         f'zwischen {x.index_time_min} Uhr und {x.index_time_max} Uhr.')
-                    fig, dataframe_first_monday, dataframe_last_sunday = plot.weekdays(dataframe.loc[startdate_1 : enddate_1].between_time(starttime_1, endtime_1))
+                    fig, dataframe_first_monday, dataframe_last_sunday = plot.weekdays(dataframe)
                     st.plotly_chart(fig, theme="streamlit", use_container_width=True, config={'displaylogo': False}, key=f'{dataframe.columns[0]}_1')
 
             with col2:
                 for dataframe in dataframe_list:
+
+                    dataframe = dataframe.loc[startdate_2 : enddate_2].between_time(starttime_2, endtime_2)
+
                     x = GetValues(dataframe)
 
                     st.subheader(dataframe.columns[0])
                     st.write(
                         f'vom {x.index_date_min} bis {x.index_date_max}, '
                         f'zwischen {x.index_time_min} Uhr und {x.index_time_max} Uhr.')
-                    fig, dataframe_first_monday, dataframe_last_sunday = plot.weekdays(dataframe.loc[startdate_2 : enddate_2].between_time(starttime_2, endtime_2))
+                    fig, dataframe_first_monday, dataframe_last_sunday = plot.weekdays(dataframe)
                     st.plotly_chart(fig, theme="streamlit", use_container_width=True, config={'displaylogo': False}, key=f'{dataframe.columns[0]}_2')
             
 

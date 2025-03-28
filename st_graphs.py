@@ -70,7 +70,7 @@ class SelectGraph():
             '(https://vmz.bremen.de/rad/radzaehlstationen-abfrage)')
         st.write('Quelle Wetterdaten: [Deutscher Wetterdienst](https://www.dwd.de)')
 
-        st.write('©2022 www.moin-stefko.de / hallo@moin-stefko.de')
+        st.write('www.moin-stefko.de / hallo@moin-stefko.de')
 
     def overview(dataframe_list):
         st.header('Übersicht')

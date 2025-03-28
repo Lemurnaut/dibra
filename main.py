@@ -25,17 +25,20 @@ st.set_page_config(layout="wide",
 col1, col2 = st.columns(2)
 
 
-@st.experimental_memo
+@st.cache_data
 def download(end_date):
     dataframe = preprocess.download_data(end_date)  # end_date is required to get fresh data from VMZ server
     return dataframe
 
 
 def main():
-    dataframe_source = download(end_date=(dt.date.today()
-                                          - dt.timedelta(1)
-                                          )
-                                )  # download data from VMZ
+    with st.status('Lade Radzähldaten ...') as status:
+        dataframe_source = download(end_date=(dt.date.today()
+                                            - dt.timedelta(1)
+                                            )
+                                    )  # download data from VMZ
+        status.update(label="Download complete!", state="complete", expanded=False)
+                      
     dataframe_list_source = preprocess.dataframe_to_list(dataframe_source)  # make a list from orig dfs
 
     startdate, enddate = st_elements.sidebar_date()  # get start,end date from widget
@@ -68,6 +71,8 @@ def main():
         sankey_dataframes = [(dataframe.loc[startdate: enddate].between_time(starttime, endtime))
                              for dataframe in sankey_source]
         st_graphs.SelectGraph.sankey(sankey_dataframes)
+    elif graph_type == 'Vergleich':
+        st_graphs.SelectGraph.vergleich(selected_dataframes)
 
 
 if __name__ == '__main__':

@@ -379,6 +379,19 @@ def radverkehr_temperatur(dataframe):
 
     return fig
 
+def radverkehr_wind(dataframe):
+    fig = px.scatter_3d(dataframe, x=dataframe.index, z=str(dataframe.columns.values[3]), color='Windgeschwindigkeit',
+                        y=str(dataframe.columns.values[0]),
+                        color_continuous_scale=px.colors.sequential.Jet, height=800
+                        )
+
+    fig.update_traces(hovertemplate='Datum: %{x} <br>' + 'Anzahl: %{y} <br>' + 'Windgeschwindigkeit: %{z}')
+
+    fig.update_traces(hoverinfo='all')
+    fig.update_layout(width=1600, height=850, margin=dict(r=10, l=10, b=10, t=10))
+
+    return fig
+
 
 def sankey(dataframe_list):
     tmp_frame = reduce(lambda a, b: a.add(b, fill_value=0), dataframe_list)

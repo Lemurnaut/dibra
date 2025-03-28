@@ -6,6 +6,7 @@ import plot
 import preprocess
 import st_elements
 import st_infotext
+import datetime
 
 class GetValues(object):
     """
@@ -45,6 +46,7 @@ class SelectGraph():
     def info():
         st.header('Das inoffizielle Bremer Radzählstationen Analysetool')
         st.markdown('by M o i n S t e f k o')
+        st.text('E X P E R I M E N T A L')
 
         components.html(st_infotext.common.map_iframe, height=600, scrolling=False)  # show map
 
@@ -220,6 +222,7 @@ class SelectGraph():
                  ' Wetterdienst an.')
 
         for dataframe in dataframe_list:
+            dataframe.index = dataframe.index.tz_localize(None)
             x = GetValues(dataframe)
 
             st.subheader(dataframe.columns[0])
@@ -229,15 +232,17 @@ class SelectGraph():
             weather_start = str(dataframe.index.min())
             weather_end = str(dataframe.index.max())
 
-            weather = preprocess.get_weather(weather_start, weather_end, 691)
+            weather = preprocess.get_weather(weather_start, weather_end)
 
-            bikeweather_hourly = pandas.merge(dataframe, weather, left_index=True, right_index=True, how='outer')
+            bikeweather_hourly = preprocess.combine_weather_bikedata(dataframe, weather)
 
             bikeweather_daily = bikeweather_hourly.resample('D').agg(
-                {bikeweather_hourly.columns.values[0]: 'sum', bikeweather_hourly.columns.values[1]: 'sum',
-                 bikeweather_hourly.columns.values[2]: 'mean'}).round()
-
-            tab1, tab2 = st.tabs(['Temperatur', 'Niederschlag'])
+                {bikeweather_hourly.columns.values[0]: 'sum', 
+                 bikeweather_hourly.columns.values[1]: 'sum',
+                 bikeweather_hourly.columns.values[2]: 'mean',
+                 bikeweather_hourly.columns.values[3]: 'mean'}).round()
+            
+            tab1, tab2, tab3 = st.tabs(['Temperatur', 'Niederschlag', 'Wind'])
             with tab1:
                 st.write('Radverkehr und Temperatur')
                 fig = plot.radverkehr_temperatur(bikeweather_daily)
@@ -246,6 +251,11 @@ class SelectGraph():
             with tab2:
                 st.write('Radverkehr und Niederschlag')
                 fig = plot.radverkehr_niederschlag(bikeweather_daily)
+                st.plotly_chart(fig, theme="streamlit", use_container_width=True, config={'displaylogo': False})
+
+            with tab3:
+                st.write('Radverkehr und Windgeschwindigkeit')
+                fig = plot.radverkehr_wind(bikeweather_daily)
                 st.plotly_chart(fig, theme="streamlit", use_container_width=True, config={'displaylogo': False})
 
             with st.expander('Daten'):
@@ -270,3 +280,191 @@ class SelectGraph():
         with st.expander('Mehr Informationen'):
             st.write(st_infotext.method_info.sankey)
             st.info('Hinweis: Die Auswahl von Radzählstationen hat keinen Einfluss auf die Darstellung.', icon='ℹ️')
+
+    def vergleich(dataframe_list):
+
+        option = st.selectbox('Diagrammtyp',('Übersicht', 'Kummulationen', 'Wochentag / Tageszeit'))
+
+        col1, col2 = st.columns(2)
+        with col1:
+            startdate_1 = st.date_input('vom', value=datetime.date(2020, 1, 1), key='vergleich1')
+            enddate_1 = st.date_input('bis', value=(datetime.date.today() - datetime.timedelta(1)), key='vergleich2')
+
+            hours = ['00:00',
+             '01:00',
+             '02:00',
+             '03:00',
+             '04:00',
+             '05:00',
+             '06:00',
+             '07:00',
+             '08:00',
+             '09:00',
+             '10:00',
+             '11:00',
+             '12:00',
+             '13:00',
+             '14:00',
+             '15:00',
+             '16:00',
+             '17:00',
+             '18:00',
+             '19:00',
+             '20:00',
+             '21:00',
+             '22:00',
+             '23:00',
+             ]
+            starttime_1, endtime_1 = st.select_slider('Tageszeit eingrenzen', options=hours,
+                                                                          value=('00:00', '23:00'),
+                                                                          key='Time_slider2')
+            
+        with col2:
+            startdate_2 = st.date_input('vom', value=datetime.date(2020, 1, 1), key='vergleich3')
+            enddate_2 = st.date_input('bis', value=(datetime.date.today() - datetime.timedelta(1)), key='vergleich4')
+
+            hours = ['00:00',
+             '01:00',
+             '02:00',
+             '03:00',
+             '04:00',
+             '05:00',
+             '06:00',
+             '07:00',
+             '08:00',
+             '09:00',
+             '10:00',
+             '11:00',
+             '12:00',
+             '13:00',
+             '14:00',
+             '15:00',
+             '16:00',
+             '17:00',
+             '18:00',
+             '19:00',
+             '20:00',
+             '21:00',
+             '22:00',
+             '23:00',
+             ]
+            starttime_2, endtime_2 = st.select_slider('Tageszeit eingrenzen', options=hours,
+                                                                          value=('00:00', '23:00'),
+                                                                          key='Time_slider3')
+        
+
+        if option == 'Übersicht':
+            with  col1:
+                for dataframe in dataframe_list:
+
+                    x = GetValues(dataframe)
+
+                    st.subheader(dataframe.columns[0])
+                    st.write(
+                        f'vom {x.index_date_min} bis {x.index_date_max}, '
+                        f'zwischen {x.index_time_min} Uhr und {x.index_time_max} Uhr.')
+                    st.write(f'Maximalwert: {x.max}, am {x.idxmax_date} um {x.idxmax_time} Uhr')
+                    fig = plot.linechart(dataframe.loc[startdate_1 : enddate_1].between_time(starttime_1, endtime_1))
+                    st.plotly_chart(fig, theme="streamlit", use_container_width=True, config={'displaylogo': False}, key=f'{dataframe.columns[0]}_1')
+
+                    with st.expander('Statistische Grundwerte'):
+                        st.write('Statistische Grundwerte')
+                        st.dataframe(data=x.stats, use_container_width=True)
+
+                    with st.expander('Daten'):
+                        st.dataframe(dataframe.style.highlight_max(axis=0))
+
+            with  col2:
+                for dataframe in dataframe_list:
+
+                    x = GetValues(dataframe)
+
+                    st.subheader(dataframe.columns[0])
+                    st.write(
+                        f'vom {x.index_date_min} bis {x.index_date_max}, '
+                        f'zwischen {x.index_time_min} Uhr und {x.index_time_max} Uhr.')
+                    st.write(f'Maximalwert: {x.max}, am {x.idxmax_date} um {x.idxmax_time} Uhr')
+                    fig = plot.linechart(dataframe.loc[startdate_2 : enddate_2].between_time(starttime_2, endtime_2))
+                    st.plotly_chart(fig, theme="streamlit", use_container_width=True, config={'displaylogo': False}, key=f'{dataframe.columns[0]}_2')
+
+                    with st.expander('Statistische Grundwerte'):
+                        st.write('Statistische Grundwerte')
+                        st.dataframe(data=x.stats, use_container_width=True)
+
+                    with st.expander('Daten'):
+                        st.dataframe(dataframe.style.highlight_max(axis=0))
+            
+            
+        if option == 'Kummulationen':
+            with col1:
+                for dataframe in dataframe_list:
+                    x = GetValues(dataframe_list[0])  # get values for index info from first df in list
+                    st.subheader(dataframe.columns[0])
+                    st.write(
+                        f'vom {x.index_date_min} bis {x.index_date_max}, '
+                        f'zwischen {x.index_time_min} Uhr und {x.index_time_max} Uhr.')
+
+                    dataframe_reduced = reduce(lambda a, b: a.add(b, fill_value=0), dataframe_list)
+                    dataframe_reduced['Gesamt'] = preprocess.sumDataframe(dataframe_list)
+                    fig = plot.linechart_cumsum(dataframe_reduced.loc[startdate_1 : enddate_1].between_time(starttime_1, endtime_1))
+                    st.plotly_chart(fig, theme="streamlit", use_container_width=True, config={'displaylogo': False}, key=f'{dataframe.columns[0]}_1')
+
+                    with st.expander('Daten'):
+                        st.dataframe(dataframe_reduced)
+
+                    with st.expander('Mehr Informationen'):
+                        st.write(st_infotext.method_info.cumsum)
+
+            with col2:
+                for dataframe in dataframe_list:
+                    x = GetValues(dataframe_list[0])  # get values for index info from first df in list
+                    st.subheader(dataframe.columns[0])
+                    st.write(
+                        f'vom {x.index_date_min} bis {x.index_date_max}, '
+                        f'zwischen {x.index_time_min} Uhr und {x.index_time_max} Uhr.')
+
+                    dataframe_reduced = reduce(lambda a, b: a.add(b, fill_value=0), dataframe_list)
+                    dataframe_reduced['Gesamt'] = preprocess.sumDataframe(dataframe_list)
+                    fig = plot.linechart_cumsum(dataframe_reduced.loc[startdate_2 : enddate_2].between_time(starttime_2, endtime_2))
+                    st.plotly_chart(fig, theme="streamlit", use_container_width=True, config={'displaylogo': False}, key=f'{dataframe.columns[0]}_2')
+
+                    with st.expander('Daten'):
+                        st.dataframe(dataframe_reduced)
+
+                    with st.expander('Mehr Informationen'):
+                        st.write(st_infotext.method_info.cumsum)
+
+        if option == 'Wochentag / Tageszeit':
+            with col1:
+                for dataframe in dataframe_list:
+                    x = GetValues(dataframe)
+
+                    st.subheader(dataframe.columns[0])
+                    st.write(
+                        f'vom {x.index_date_min} bis {x.index_date_max}, '
+                        f'zwischen {x.index_time_min} Uhr und {x.index_time_max} Uhr.')
+                    fig, dataframe_first_monday, dataframe_last_sunday = plot.weekdays(dataframe.loc[startdate_1 : enddate_1].between_time(starttime_1, endtime_1))
+                    st.plotly_chart(fig, theme="streamlit", use_container_width=True, config={'displaylogo': False}, key=f'{dataframe.columns[0]}_1')
+
+            with col2:
+                for dataframe in dataframe_list:
+                    x = GetValues(dataframe)
+
+                    st.subheader(dataframe.columns[0])
+                    st.write(
+                        f'vom {x.index_date_min} bis {x.index_date_max}, '
+                        f'zwischen {x.index_time_min} Uhr und {x.index_time_max} Uhr.')
+                    fig, dataframe_first_monday, dataframe_last_sunday = plot.weekdays(dataframe.loc[startdate_2 : enddate_2].between_time(starttime_2, endtime_2))
+                    st.plotly_chart(fig, theme="streamlit", use_container_width=True, config={'displaylogo': False}, key=f'{dataframe.columns[0]}_2')
+            
+
+            
+        
+
+    
+
+   
+
+
+
+

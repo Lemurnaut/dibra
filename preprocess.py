@@ -1,10 +1,6 @@
 from functools import reduce
 import pandas
 
-from wetterdienst.provider.dwd.observation import DwdObservationRequest, DwdObservationDataset, DwdObservationPeriod, \
-    DwdObservationResolution
-from wetterdienst import Settings
-
 
 def download_data(end_date):
     station_id = ['100044202',
@@ -40,7 +36,8 @@ def download_data(end_date):
     dataframe = dataframe.rename(columns={dataframe.columns[0]: "Datetime"})
 
     dataframe['Datetime'] = pandas.DatetimeIndex(dataframe.Datetime)
-    # fix to avoid streamlit timezone/ambiguous errors
+    # fix to avoid streamlit timezone/ambiguous errors 
+    # its not a fix anymore
     # dataframe['Datetime'] = dataframe['Datetime'].dt.tz_localize('UTC')
 
     dataframe.set_index(dataframe.Datetime, inplace=True)
@@ -57,8 +54,6 @@ def dataframe_to_list(dataframe):
     :param dataframe: pd.Dataframe
     :return: list
     """
-    import pandas
-
     column_names = dataframe.columns.tolist()
     dataframe_list = []
 
@@ -80,11 +75,8 @@ def sumDataframe(dataframe_list):
     sum the rows
     returns pandas dataframe
     """
-    import pandas as pd
-    from functools import reduce
-
     dataframe = reduce(lambda a, b: a.add(b, fill_value=0), dataframe_list)
-    dataframe = pd.DataFrame(dataframe.sum(axis=1))
+    dataframe = pandas.DataFrame(dataframe.sum(axis=1))
     return dataframe
 
 
@@ -124,41 +116,49 @@ def combine_stations_sides(dataframe_list):
     return dataframe_list_simple
 
 
-def get_weather(start_date: str, end_date: str, station_id: int):
-    """
-    for wetterdienst==0.42.0
-    """
+# https://wetterdienst.readthedocs.io/en/latest/usage/python-api/
+# https://wetterdienst.readthedocs.io/en/latest/data/parameters/
 
-    Settings.tidy = True
-    Settings.humanize = True
-    Settings.si_units = False
+from wetterdienst.provider.dwd.observation import DwdObservationRequest
+from wetterdienst import Settings
 
-    import pandas
+def get_weather(weather_start_date, weather_end_date):
 
+    # if no settings are provided, default settings are used which are
+    # Settings(ts_shape="long", ts_humanize=True, ts_si_units=True)
     request = DwdObservationRequest(
-        parameter=[DwdObservationDataset.TEMPERATURE_AIR, DwdObservationDataset.PRECIPITATION],
-        resolution=DwdObservationResolution.HOURLY,
-        start_date=start_date,
-        end_date=end_date,
-    ).filter_by_station_id(station_id=(station_id))
+        parameters=[("hourly", "temperature_air", "temperature_air_mean_2m"),
+                    ("hourly", "wind", "wind_speed"),
+                    ("hourly", "precipitation", "precipitation_height"), 
+                     ],
+        start_date = weather_start_date, 
+        end_date = weather_end_date,
+    )
+    stations = request.filter_by_station_id(station_id=("00691"))
 
-    for result in request.values.query():
-        niederschlag = result.df[result.df['parameter'] == 'precipitation_height']
-        temperatur = result.df[result.df['parameter'] == 'temperature_air_mean_200']
+    # Query data all together
+    df = stations.values.all().df.drop_nulls()
+    df = df.to_pandas()
+    df['parameter'] = df['parameter'].replace({"temperature_air_mean_2m" : 'Temperatur', "wind_speed" : 'Windgeschwindigkeit', "precipitation_height": "Niederschlag"})
 
-    pandas.to_datetime(niederschlag['date'], format='%Y-%m-%d %H:%M:%S').copy()
-    niederschlag.set_index(pandas.DatetimeIndex(niederschlag['date']), inplace=True)
+    df.set_index(df.date, inplace=True)
+    df.index = df.index.tz_localize(None)
+    
+    return df
 
-    niederschlag = niederschlag.rename(columns={'value': 'Niederschlag'})
-    niederschlag = niederschlag.drop(columns={'station_id', 'dataset', 'parameter', 'date', 'quality'})
+def combine_weather_bikedata(bike_df, weather_df):
+    weather_parameter_list = weather_df['parameter'].unique().tolist()
 
-    pandas.to_datetime(temperatur['date'], format='%Y-%m-%d %H:%M:%S').copy()
-    temperatur.set_index(pandas.DatetimeIndex(temperatur['date']), inplace=True)
+    df_final = None
 
-    temperatur = temperatur.rename(columns={'value': 'Temperatur'})
-    temperatur = temperatur.drop(columns={'station_id', 'dataset', 'parameter', 'date', 'quality'})
-
-    weather = pandas.merge(niederschlag, temperatur, left_index=True, right_index=True, how='outer')
-    weather.index = weather.index.tz_localize(tz=None)  # delete timezone from df index
-
-    return weather
+    for i in weather_parameter_list:
+        df_parameter = weather_df[weather_df['parameter'] == i]
+        df_parameter = df_parameter.set_index('date')
+        df_parameter.index = df_parameter.index.tz_localize(None)
+        if df_final is None:
+            df_final = bike_df.join(df_parameter['value'])
+            df_final = df_final.rename(columns={'value' : i})
+        else:
+            df_final = df_final.join(df_parameter['value'])
+            df_final = df_final.rename(columns={'value' : i})
+    return df_final

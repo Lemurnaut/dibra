@@ -3,8 +3,6 @@ import datetime
 import streamlit as st
 
 
-
-
 def sidebar_date():
     st.sidebar.write('Datum eingrenzen')
 
@@ -78,9 +76,7 @@ def sidebar_station_select(dataframe_list):
             station_dict[key] = value
             dataframe_list.remove(value)
             break
-
     stationID = st.sidebar.multiselect('Radzählstation', station_names, default='Wilhelm-Kaisen-Brücke (Ost)')
-
     selected_dfs = [station_dict.get(i) for i in stationID]
     return selected_dfs
 
@@ -94,6 +90,7 @@ def sidebar_graph_select():
                                                         'Oberflächendiagramm',
                                                         'Radverkehr und Wetter',
                                                         'Sankey-Diagramm',
+                                                        'Vergleich'
                                                         ])
     return selected_graph
 

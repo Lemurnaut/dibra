@@ -1,6 +1,6 @@
 streamlit==1.43.2
 pandas==2.2.3
-plotly==5.11.0
+plotly==5.24.1
 numpy==2.2.4
 statsmodels==0.14.4
 scipy==1.15.1

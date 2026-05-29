@@ -113,9 +113,9 @@ def surface_options():
 def ma_options(dataframe):
     st.sidebar.markdown('**Diagrammoptionen**')
     moving_average_window = st.sidebar.slider(
-        'Größe des sich bewegenden Fensters. Enthält die Anzahl der Beobachtungen, die zur Berechnung gleitenden Mittelwertes verwendet werden.', min_value=0, max_value=int(dataframe.count()[0] / 24))
+        'Größe des sich bewegenden Fensters. Enthält die Anzahl der Beobachtungen, die zur Berechnung gleitenden Mittelwertes verwendet werden.', min_value=0, max_value=int(dataframe.count().iloc[0] / 24))
     moving_average_period = st.sidebar.slider('Erforderliche Mindestanzahl von Beobachtungen im oben definierten Fenster.', min_value=0,
-                                              max_value=int(dataframe.count()[0] / 24))
+                                              max_value=int(dataframe.count().iloc[0] / 24))
 
     return moving_average_window, moving_average_period
 

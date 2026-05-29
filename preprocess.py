@@ -42,7 +42,7 @@ def download_data(end_date):
 
     dataframe.set_index(dataframe.Datetime, inplace=True)
     dataframe = dataframe.drop(columns={dataframe.columns[0]})
-    dataframe.set_index(dataframe.index.floor('H'), inplace=True)
+    dataframe.set_index(dataframe.index.floor('h'), inplace=True)
     dataframe = dataframe.sort_index()
 
     return dataframe
@@ -62,7 +62,7 @@ def dataframe_to_list(dataframe):
 
     dataframe_proceed = []
     for dataframe in dataframe_list:
-        dataframe = dataframe.truncate(before=(dataframe.gt(0).idxmax()[0]), copy=True)
+        dataframe = dataframe.truncate(before=(dataframe.gt(0).idxmax().iloc[0]), copy=True)
         dataframe_proceed.append(dataframe)
 
     return dataframe_proceed

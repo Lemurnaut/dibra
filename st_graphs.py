@@ -20,10 +20,10 @@ class GetValues(object):
         self.index_time_min = dataframe.index.min().strftime('%H:%M')
         self.index_time_max = dataframe.index.max().strftime('%H:%M')
 
-        self.max = '{:,.0f}'.format(dataframe.max()[0])
+        self.max = '{:,.0f}'.format(dataframe.max().iloc[0])
 
-        self.idxmax_date = dataframe.idxmax()[0].strftime('%d-%m-%Y')
-        self.idxmax_time = dataframe.idxmax()[0].strftime('%H:%M')
+        self.idxmax_date = dataframe.idxmax().iloc[0].strftime('%d-%m-%Y')
+        self.idxmax_time = dataframe.idxmax().iloc[0].strftime('%H:%M')
 
         self.stats = self.stats(dataframe)
 
@@ -83,15 +83,31 @@ class SelectGraph():
                 f'zwischen {x.index_time_min} Uhr und {x.index_time_max} Uhr.')
             st.write(f'Maximalwert: {x.max}, am {x.idxmax_date} um {x.idxmax_time} Uhr')
 
-            fig = plot.linechart(dataframe)
-            st.plotly_chart(fig, theme="streamlit", use_container_width=True, config={'displaylogo': False})
+            tab1, tab2, tab3, tab4 = st.tabs(['Stunden', 'Wochen', 'Monate', 'Monate/Jahre'])
+            with tab1:
+                fig = plot.linechart(dataframe)
+                st.plotly_chart(fig, theme="streamlit", width='stretch', config={'displaylogo': False})
 
-            with st.expander('Statistische Grundwerte'):
-                st.write('Statistische Grundwerte')
-                st.dataframe(data=x.stats, use_container_width=True)
+                with st.expander('Statistische Grundwerte'):
+                    st.write('Statistische Grundwerte')
+                    st.dataframe(data=x.stats, width='stretch')
 
-            with st.expander('Daten'):
-                st.dataframe(dataframe.style.highlight_max(axis=0))
+                with st.expander('Daten'):
+                    st.dataframe(dataframe.style.highlight_max(axis=0))
+
+            with tab2:
+                df = dataframe.resample('W-MON').sum()
+                fig = plot.bar(df) 
+                st.plotly_chart(fig, theme="streamlit", width='stretch', config={'displaylogo': False})
+
+            with tab3:
+                df = dataframe.resample('M').sum()
+                fig = plot.bar(df) 
+                st.plotly_chart(fig, theme="streamlit", width='stretch', config={'displaylogo': False})
+
+            with tab4:
+                fig = plot.grouped_sums(dataframe)
+                st.plotly_chart(fig,theme="streamlit", width='stretch', config={'displaylogo': False})
 
 
     def cumsum(dataframe_list):
@@ -106,7 +122,7 @@ class SelectGraph():
         dataframe_reduced = reduce(lambda a, b: a.add(b, fill_value=0), dataframe_list)
         dataframe_reduced['Gesamt'] = preprocess.sumDataframe(dataframe_list)
         fig = plot.linechart_cumsum(dataframe_reduced)
-        st.plotly_chart(fig, theme="streamlit", use_container_width=True, config={'displaylogo': False})
+        st.plotly_chart(fig, theme="streamlit", width='stretch', config={'displaylogo': False})
 
         with st.expander('Daten'):
             st.dataframe(dataframe_reduced)
@@ -131,10 +147,10 @@ class SelectGraph():
             tab1, tab2 = st.tabs(['Wochentage', 'Woche /Wochenende'])
             with tab1:
                 fig, dataframe_first_monday, dataframe_last_sunday = plot.weekdays(dataframe)
-                st.plotly_chart(fig, theme="streamlit", use_container_width=True, config={'displaylogo': False})
+                st.plotly_chart(fig, theme="streamlit", width='stretch', config={'displaylogo': False})
             with tab2:
                 fig = plot.week_dist(dataframe)
-                st.plotly_chart(fig, theme="streamlit", use_container_width=True, config={'displaylogo': False})
+                st.plotly_chart(fig, theme="streamlit", width='stretch', config={'displaylogo': False})
 
     def stl(dataframe_list):
         st.header('Saison-Trend-Zerlegung')
@@ -156,12 +172,12 @@ class SelectGraph():
 
             tab1, tab2, tab3 = st.tabs(['Saison', 'Trend', 'Residuen'])
             with tab1:
-                st.plotly_chart(trend, use_container_width=True, config={'displaylogo': False})
+                st.plotly_chart(trend, width='stretch', config={'displaylogo': False})
 
             with tab2:
-                st.plotly_chart(seasonal, use_container_width=True, config={'displaylogo': False})
+                st.plotly_chart(seasonal, width='stretch', config={'displaylogo': False})
             with tab3:
-                st.plotly_chart(resid, use_container_width=True, config={'displaylogo': False})
+                st.plotly_chart(resid, width='stretch', config={'displaylogo': False})
 
             with st.expander('Zeige Daten'):
                 data_to_show = pandas.merge(
@@ -188,10 +204,10 @@ class SelectGraph():
 
             if plot_option == 'Jahr/Monat':
                 fig = plot.surface.year_month(dataframe, calc_option)
-                st.plotly_chart(fig, use_container_width=True, config={'displaylogo': False})
+                st.plotly_chart(fig, width='stretch', config={'displaylogo': False})
             if plot_option == 'Wochen/Stunden':
                 fig = plot.surface.week_hour(dataframe, calc_option)
-                st.plotly_chart(fig, use_container_width=True, config={'displaylogo': False})
+                st.plotly_chart(fig, width='stretch', config={'displaylogo': False})
 
     def moving_av(dataframe_list):
         st.header('Gleitdender Mittelwert')
@@ -207,7 +223,7 @@ class SelectGraph():
             window, periods = st_elements.ma_options(dataframe)
             try:
                 fig = plot.moving_av(dataframe, window, periods)
-                st.plotly_chart(fig, theme="streamlit", use_container_width=True, config={'displaylogo': False})
+                st.plotly_chart(fig, theme="streamlit", width='stretch', config={'displaylogo': False})
             except ValueError:
                 st.warning(
                     f'Fehler! Größe des sich bewegenden Fensters muss kleiner sein als die erforderliche Mindestanzahl '
@@ -246,17 +262,17 @@ class SelectGraph():
             with tab1:
                 st.write('Radverkehr und Temperatur')
                 fig = plot.radverkehr_temperatur(bikeweather_daily)
-                st.plotly_chart(fig, theme="streamlit", use_container_width=True, config={'displaylogo': False})
+                st.plotly_chart(fig, theme="streamlit", width='stretch', config={'displaylogo': False})
 
             with tab2:
                 st.write('Radverkehr und Niederschlag')
                 fig = plot.radverkehr_niederschlag(bikeweather_daily)
-                st.plotly_chart(fig, theme="streamlit", use_container_width=True, config={'displaylogo': False})
+                st.plotly_chart(fig, theme="streamlit", width='stretch', config={'displaylogo': False})
 
             with tab3:
                 st.write('Radverkehr und Windgeschwindigkeit')
                 fig = plot.radverkehr_wind(bikeweather_daily)
-                st.plotly_chart(fig, theme="streamlit", use_container_width=True, config={'displaylogo': False})
+                st.plotly_chart(fig, theme="streamlit", width='stretch', config={'displaylogo': False})
 
             with st.expander('Daten'):
                 st.dataframe(bikeweather_daily.style.highlight_max(axis=0))
@@ -275,7 +291,7 @@ class SelectGraph():
                  f'zwischen {x.index_time_min} Uhr und {x.index_time_max} Uhr.')
 
         fig = plot.sankey(dataframe_list)
-        st.plotly_chart(fig, theme="streamlit", use_container_width=True, config={'displaylogo': False})
+        st.plotly_chart(fig, theme="streamlit", width='stretch', config={'displaylogo': False})
 
         with st.expander('Mehr Informationen'):
             st.write(st_infotext.method_info.sankey)
@@ -285,12 +301,7 @@ class SelectGraph():
 
         option = st.selectbox('Diagrammtyp',('Übersicht', 'Kummulationen', 'Wochentag / Tageszeit'))
 
-        col1, col2 = st.columns(2)
-        with col1:
-            startdate_1 = st.date_input('vom', value=datetime.date(2020, 1, 1), key='vergleich1')
-            enddate_1 = st.date_input('bis', value=(datetime.date.today() - datetime.timedelta(1)), key='vergleich2')
-
-            hours = ['00:00',
+        hours = ['00:00',
              '01:00',
              '02:00',
              '03:00',
@@ -315,6 +326,12 @@ class SelectGraph():
              '22:00',
              '23:00',
              ]
+
+        col1, col2 = st.columns(2)
+        with col1:
+            startdate_1 = st.date_input('vom', value=datetime.date(2020, 1, 1), key='vergleich1')
+            enddate_1 = st.date_input('bis', value=(datetime.date.today() - datetime.timedelta(1)), key='vergleich2')
+
             starttime_1, endtime_1 = st.select_slider('Tageszeit eingrenzen', options=hours,
                                                                           value=('00:00', '23:00'),
                                                                           key='Time_slider2')
@@ -323,31 +340,6 @@ class SelectGraph():
             startdate_2 = st.date_input('vom', value=datetime.date(2020, 1, 1), key='vergleich3')
             enddate_2 = st.date_input('bis', value=(datetime.date.today() - datetime.timedelta(1)), key='vergleich4')
 
-            hours = ['00:00',
-             '01:00',
-             '02:00',
-             '03:00',
-             '04:00',
-             '05:00',
-             '06:00',
-             '07:00',
-             '08:00',
-             '09:00',
-             '10:00',
-             '11:00',
-             '12:00',
-             '13:00',
-             '14:00',
-             '15:00',
-             '16:00',
-             '17:00',
-             '18:00',
-             '19:00',
-             '20:00',
-             '21:00',
-             '22:00',
-             '23:00',
-             ]
             starttime_2, endtime_2 = st.select_slider('Tageszeit eingrenzen', options=hours,
                                                                           value=('00:00', '23:00'),
                                                                           key='Time_slider3')
@@ -367,11 +359,11 @@ class SelectGraph():
                         f'zwischen {x.index_time_min} Uhr und {x.index_time_max} Uhr.')
                     st.write(f'Maximalwert: {x.max}, am {x.idxmax_date} um {x.idxmax_time} Uhr')
                     fig = plot.linechart(dataframe)
-                    st.plotly_chart(fig, theme="streamlit", use_container_width=True, config={'displaylogo': False}, key=f'{dataframe.columns[0]}_1')
+                    st.plotly_chart(fig, theme="streamlit", width='stretch', config={'displaylogo': False}, key=f'{dataframe.columns[0]}_1')
 
                     with st.expander('Statistische Grundwerte'):
                         st.write('Statistische Grundwerte')
-                        st.dataframe(data=x.stats, use_container_width=True)
+                        st.dataframe(data=x.stats, width='stretch')
 
                     with st.expander('Daten'):
                         st.dataframe(dataframe.style.highlight_max(axis=0))
@@ -389,11 +381,11 @@ class SelectGraph():
                         f'zwischen {x.index_time_min} Uhr und {x.index_time_max} Uhr.')
                     st.write(f'Maximalwert: {x.max}, am {x.idxmax_date} um {x.idxmax_time} Uhr')
                     fig = plot.linechart(dataframe)
-                    st.plotly_chart(fig, theme="streamlit", use_container_width=True, config={'displaylogo': False}, key=f'{dataframe.columns[0]}_2')
+                    st.plotly_chart(fig, theme="streamlit", width='stretch', config={'displaylogo': False}, key=f'{dataframe.columns[0]}_2')
 
                     with st.expander('Statistische Grundwerte'):
                         st.write('Statistische Grundwerte')
-                        st.dataframe(data=x.stats, use_container_width=True)
+                        st.dataframe(data=x.stats, width='stretch')
 
                     with st.expander('Daten'):
                         st.dataframe(dataframe.style.highlight_max(axis=0))
@@ -414,7 +406,7 @@ class SelectGraph():
                     dataframe_reduced = reduce(lambda a, b: a.add(b, fill_value=0), dataframe_list)
                     dataframe_reduced['Gesamt'] = preprocess.sumDataframe(dataframe_list)
                     fig = plot.linechart_cumsum(dataframe_reduced)
-                    st.plotly_chart(fig, theme="streamlit", use_container_width=True, config={'displaylogo': False}, key=f'{dataframe.columns[0]}_1')
+                    st.plotly_chart(fig, theme="streamlit", width='stretch', config={'displaylogo': False}, key=f'{dataframe.columns[0]}_1')
 
                     with st.expander('Daten'):
                         st.dataframe(dataframe_reduced)
@@ -436,7 +428,7 @@ class SelectGraph():
                     dataframe_reduced = reduce(lambda a, b: a.add(b, fill_value=0), dataframe_list)
                     dataframe_reduced['Gesamt'] = preprocess.sumDataframe(dataframe_list)
                     fig = plot.linechart_cumsum(dataframe_reduced)
-                    st.plotly_chart(fig, theme="streamlit", use_container_width=True, config={'displaylogo': False}, key=f'{dataframe.columns[0]}_2')
+                    st.plotly_chart(fig, theme="streamlit", width='stretch', config={'displaylogo': False}, key=f'{dataframe.columns[0]}_2')
 
                     with st.expander('Daten'):
                         st.dataframe(dataframe_reduced)
@@ -457,7 +449,7 @@ class SelectGraph():
                         f'vom {x.index_date_min} bis {x.index_date_max}, '
                         f'zwischen {x.index_time_min} Uhr und {x.index_time_max} Uhr.')
                     fig, dataframe_first_monday, dataframe_last_sunday = plot.weekdays(dataframe)
-                    st.plotly_chart(fig, theme="streamlit", use_container_width=True, config={'displaylogo': False}, key=f'{dataframe.columns[0]}_1')
+                    st.plotly_chart(fig, theme="streamlit", width='stretch', config={'displaylogo': False}, key=f'{dataframe.columns[0]}_1')
 
             with col2:
                 for dataframe in dataframe_list:
@@ -471,7 +463,7 @@ class SelectGraph():
                         f'vom {x.index_date_min} bis {x.index_date_max}, '
                         f'zwischen {x.index_time_min} Uhr und {x.index_time_max} Uhr.')
                     fig, dataframe_first_monday, dataframe_last_sunday = plot.weekdays(dataframe)
-                    st.plotly_chart(fig, theme="streamlit", use_container_width=True, config={'displaylogo': False}, key=f'{dataframe.columns[0]}_2')
+                    st.plotly_chart(fig, theme="streamlit", width='stretch', config={'displaylogo': False}, key=f'{dataframe.columns[0]}_2')
             
 
             

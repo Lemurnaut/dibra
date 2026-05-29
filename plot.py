@@ -101,7 +101,55 @@ class surface():
             margin=dict(r=10, l=10, b=10, t=10
                         ))
         return fig
+    
 
+def bar(dataframe):
+    fig = px.bar(dataframe, x=dataframe.index, y=dataframe.columns[0])
+    fig.update_layout(xaxis_title='Zeit', yaxis_title='Radverkehrsaufkommen')
+    return fig
+
+
+# helper to dismantle a np.array of values from grouped dataframe
+# wtf
+# https://stackoverflow.com/questions/952914/how-do-i-make-a-flat-list-out-of-a-list-of-lists
+def flatten(xss):
+    return [x for xs in xss for x in xs]
+
+
+def grouped_sums(dataframe):
+    years_in_df = dataframe.index.year.unique().to_list()
+    station_name = dataframe.columns[0]
+
+    dataframe = dataframe.groupby([dataframe.index.year, dataframe.index.month]).mean()
+
+    months = ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun',
+            'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez']
+    
+    colors = ['lightslategray'] *12
+
+    fig = go.Figure()
+    for year in years_in_df:
+        fig.add_trace(go.Bar(
+            y= flatten(dataframe.xs(year).values.tolist()),
+            x= months,
+            name=year,
+            marker_color=colors,
+            showlegend=False
+        ))
+
+    fig.update_layout(barmode='group', 
+                    xaxis_tickangle=-45,
+                    title=station_name,
+                    )
+    
+    fig.update_xaxes(
+        ticks='outside',
+    )
+    fig.update_yaxes(
+        ticks='outside',
+        gridcolor='lightgrey'
+    )
+    return fig
 
 def moving_av(dataframe, window, periods):
     ma = dataframe.resample('D').sum().rolling(window=window, center=True, min_periods=periods).mean()
@@ -280,7 +328,7 @@ def linechart(dataframe):
         )
     )
 
-    fig.add_annotation(x=dataframe.idxmax()[0].strftime('%Y-%m-%d %H:%M:%S'), y=dataframe.max()[0],
+    fig.add_annotation(x=dataframe.idxmax().iloc[0].strftime('%Y-%m-%d %H:%M:%S'), y=dataframe.max().iloc[0],
                        text='Maximum',
                        showarrow=True,
                        arrowhead=1)
@@ -359,7 +407,7 @@ def radverkehr_niederschlag(dataframe):
                         )
 
     fig.update_traces(hovertemplate='Datum: %{x} <br>' + 'Anzahl: %{y} <br>' + 'Niederschlag: %{z}')
-
+    fig.update_traces(marker_size = 3)
     fig.update_traces(hoverinfo='all')
     fig.update_layout(width=1600, height=850, margin=dict(r=10, l=10, b=10, t=10))
 
@@ -373,7 +421,7 @@ def radverkehr_temperatur(dataframe):
                         )
 
     fig.update_traces(hovertemplate='Datum: %{x} <br>' + 'Anzahl: %{y} <br>' + 'Temperatur: %{z}')
-
+    fig.update_traces(marker_size = 3)
     fig.update_traces(hoverinfo='all')
     fig.update_layout(width=1600, height=850, margin=dict(r=10, l=10, b=10, t=10))
 
@@ -386,7 +434,7 @@ def radverkehr_wind(dataframe):
                         )
 
     fig.update_traces(hovertemplate='Datum: %{x} <br>' + 'Anzahl: %{y} <br>' + 'Windgeschwindigkeit: %{z}')
-
+    fig.update_traces(marker_size = 3)
     fig.update_traces(hoverinfo='all')
     fig.update_layout(width=1600, height=850, margin=dict(r=10, l=10, b=10, t=10))
 
@@ -444,23 +492,23 @@ def sankey(dataframe_list):
     target = [12, 12, 13, 13, 16, 14, 14, 16, 15, 15, 16, 16,
               16, 16, 16, 16
               ]
-    value = [dataframe_list[0].sum()[0],  # 0
-             dataframe_list[1].sum()[0],  # 1
-             dataframe_list[2].sum()[0],  # 2
-             dataframe_list[3].sum()[0],  # 3
-             dataframe_list[4].sum()[0],  # 4
-             dataframe_list[5].sum()[0],  # 5
-             dataframe_list[6].sum()[0],  # 6
-             dataframe_list[7].sum()[0],  # 7
-             dataframe_list[8].sum()[0],  # 8
-             dataframe_list[9].sum()[0],  # 9
-             dataframe_list[10].sum()[0],  # 10
-             dataframe_list[11].sum()[0],  # 11
+    value = [dataframe_list[0].sum().iloc[0],  # 0
+             dataframe_list[1].sum().iloc[0],  # 1
+             dataframe_list[2].sum().iloc[0],  # 2
+             dataframe_list[3].sum().iloc[0],  # 3
+             dataframe_list[4].sum().iloc[0],  # 4
+             dataframe_list[5].sum().iloc[0],  # 5
+             dataframe_list[6].sum().iloc[0],  # 6
+             dataframe_list[7].sum().iloc[0],  # 7
+             dataframe_list[8].sum().iloc[0],  # 8
+             dataframe_list[9].sum().iloc[0],  # 9
+             dataframe_list[10].sum().iloc[0],  # 10
+             dataframe_list[11].sum().iloc[0],  # 11
 
-             dataframe_list[0].sum()[0] + dataframe_list[1].sum()[0],  # 12
-             dataframe_list[2].sum()[0] + dataframe_list[3].sum()[0],  # 13
-             dataframe_list[5].sum()[0] + dataframe_list[6].sum()[0],  # 14
-             dataframe_list[8].sum()[0] + dataframe_list[9].sum()[0],  # 15
+             dataframe_list[0].sum().iloc[0] + dataframe_list[1].sum().iloc[0],  # 12
+             dataframe_list[2].sum().iloc[0] + dataframe_list[3].sum().iloc[0],  # 13
+             dataframe_list[5].sum().iloc[0] + dataframe_list[6].sum().iloc[0],  # 14
+             dataframe_list[8].sum().iloc[0] + dataframe_list[9].sum().iloc[0],  # 15
              ]
 
     customdata_node = [dataframe_list[0].columns[0],  # 0

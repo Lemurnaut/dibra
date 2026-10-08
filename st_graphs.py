@@ -1,7 +1,6 @@
 from functools import reduce
 import pandas
 import streamlit as st
-import streamlit.components.v1 as components
 import plot
 import preprocess
 import st_elements
@@ -47,8 +46,6 @@ class SelectGraph():
         st.header('Das inoffizielle Bremer Radzählstationen Analysetool')
         st.markdown('by M o i n S t e f k o')
         st.text('E X P E R I M E N T A L')
-
-        components.html(st_infotext.common.map_iframe, height=600, scrolling=False)  # show map
 
         st.write(st_infotext.common.intro_1)
 
@@ -101,7 +98,7 @@ class SelectGraph():
                 st.plotly_chart(fig, theme="streamlit", width='stretch', config={'displaylogo': False})
 
             with tab3:
-                df = dataframe.resample('M').sum()
+                df = dataframe.resample('ME').sum()
                 fig = plot.bar(df) 
                 st.plotly_chart(fig, theme="streamlit", width='stretch', config={'displaylogo': False})
 

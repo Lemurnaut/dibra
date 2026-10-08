@@ -43,9 +43,9 @@ def main():
 
     startdate, enddate = st_elements.sidebar_date()  # get start,end date from widget
     starttime, endtime = st_elements.sidebar_time()  # get start, end time from widget
-
+        
     selected_dataframes = st_elements.sidebar_station_select(dataframe_list_source)  # get user input from widget
-    selected_dataframes = [(dataframe.loc[startdate: enddate].between_time(starttime, endtime))
+    selected_dataframes = [(dataframe.loc[str(startdate) : str(enddate)].between_time(starttime, endtime))
                            for dataframe in selected_dataframes]  # get user input
 
     graph_type = st_elements.sidebar_graph_select()  # get user input graph

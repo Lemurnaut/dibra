@@ -42,7 +42,7 @@ def download_data(end_date):
 
     dataframe.set_index(dataframe.Datetime, inplace=True)
     dataframe = dataframe.drop(columns={dataframe.columns[0]})
-    dataframe.set_index(dataframe.index.floor('h'), inplace=True)
+    #dataframe.set_index(dataframe.index.floor('h'), inplace=True)
     dataframe = dataframe.sort_index()
 
     return dataframe
